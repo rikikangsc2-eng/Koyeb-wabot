@@ -329,10 +329,11 @@ const autoAI = async () => {
                     
                 case 'ai': {
                     if (!msg) return m.reply('*masukan query*');
+                    loading();
                     try {
                         const response = await axios.get('https://nue-api.vercel.app/api/nuego',{params:{
                             q: msg,
-                            user: m.chat
+                            user: m.chat+'v1'
                         }});
                         m.reply(response.data.result);
                     } catch (error) {
