@@ -395,10 +395,8 @@ const autoAI = async () => {
                                             buttonData[m.sender] = data;
                                             if (buttonData[m.sender].result[0].url) {
                                                 buttonText[m.sender] = {
-                                                    1: `loading()
-                                                    client.sendMessage(m.chat, {image: {url: buttonData[m.sender].result[0].url}, mimetype: 'image/jpeg'});`,
-                                                    2: `loading()
-                                                    client.sendMessage(m.chat, {video: {url: buttonData[m.sender].result[0].url}, mimetype: 'video/mp4'});`
+                                                    1: `client.sendMessage(m.chat, {image: {url: buttonData[m.sender].result[0].url}, mimetype: 'image/jpeg'});`,
+                                                    2: `client.sendMessage(m.chat, {video: {url: buttonData[m.sender].result[0].url}, mimetype: 'video/mp4'});`
                                                 };
                                                 m.reply(`> Reply Chat Dan Pilih Nomornya!\n1. unduh photo\n2. unduh video\n\nalicia-metadata: ${waktu}`);
                                             } else {
@@ -467,8 +465,7 @@ const autoAI = async () => {
                                                             authorInfo
                                                         };
                                                         buttonText[m.sender] = {
-                                                            1: `loading();
-                                                            client.sendMessage(m.chat, {
+                                                            1: `client.sendMessage(m.chat, {
                                                             video: { url: buttonData[m.sender].result.video },
                                                             mimetype: 'video/mp4'
                                                             }, { quoted: m });`,
