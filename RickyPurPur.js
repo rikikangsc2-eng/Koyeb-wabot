@@ -17,6 +17,7 @@ const toUrl = require("./func/tools-toUrl.js");
 const gameku = require('./func/fun-game.js');
 //---
 const botOwner = '6283894391287';
+const noBot = '6283873321433'
 const botGroup = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
 //---
 const arrMenuDownloader = ['instagram - pengunduh foto/video ig', 'ig - cmd singkat Instagram', 'tiktok - pengunduh video/foto tiktok', 'tt - cmd singkat tiktok', 'play - cari dan play video/audio YouTube', 'ytmp3 - pengunduh YouTube audio', 'ytmp4 - pengunduh YouTube video'];
@@ -83,13 +84,7 @@ const menu = menuCategories
 console.log(menu);
 //---
 //Database local
-let data = {};
-if (fs.existsSync('./DB/data.json')) {
-    data = JSON.parse(fs.readFileSync('./DB/data.json', 'utf8'));
-}
 //---
-let pilihAi = data.pilihAi || {};
-let suaraAi = data.suaraAi || {};
 let buttonData = {};
 let buttonDate = {};
 let buttonText = {};
@@ -209,13 +204,6 @@ module.exports = sansekai = async (client, m, chatUpdate) => {
         if (!buttonText[m.sender]) {
             buttonText[m.sender] = undefined;
         }
-        if (!pilihAi[m.sender]) {
-            pilihAi[m.sender] = undefined;
-        }
-        if (!suaraAi[m.sender]) {
-            suaraAi[m.sender] = false;
-        }
-
 
         if (m.quoted && m.quoted.text.includes('alicia-metadata:')) {
             if (!m.quoted.text.includes(m.sender.split('@')[0])) {
@@ -278,7 +266,7 @@ const autoAI = async () => {
                 return autoAI();
             }
         }
-        if (m.quoted && m.quoted.isBaileys && !cekCmd(m.body)) {
+        if (m.quoted && m.quoted.sender.includes(noBot) && !cekCmd(m.body)) {
             return autoAI();
         }
 
