@@ -1,4 +1,3 @@
-const fs = require('fs');
 const axios = require('axios');
 
 const maxThreshold = 10000;
@@ -76,18 +75,45 @@ const getNextRankPoints = (points) => {
   return 0;
 };
 
-const skor = (username) => {
-  const pointData = JSON.parse(fs.readFileSync('./DB/point.json'));
+const getPointData = async () => {
+  const response = await axios.get('http://nue-db.vercel.app/read/point');
+  return response.data || {};
+};
+
+const savePointData = async (pointData) => {
+  await axios.post('http://nue-db.vercel.app/write/point', { json: pointData });
+};
+
+const getSoalData = async () => {
+  const response = await axios.get('http://nue-db.vercel.app/read/soal');
+  return response.data || {};
+};
+
+const saveSoalData = async (soalData) => {
+  await axios.post('http://nue-db.vercel.app/write/soal', { json: soalData });
+};
+
+const getNyerahData = async () => {
+  const response = await axios.get('http://nue-db.vercel.app/read/nyerah');
+  return response.data || {};
+};
+
+const saveNyerahData = async (nyerahData) => {
+  await axios.post('http://nue-db.vercel.app/write/nyerah', { json: nyerahData });
+};
+
+const skor = async (username) => {
+  const pointData = await getPointData();
   const points = pointData[username] || 0;
   const rankTitle = getRankTitle(points);
   const pointsToNextRank = getNextRankPoints(points);
   const nextRankTitle = getRankTitle(points + pointsToNextRank);
-  
+
   return `*Point :* ${points}\n*Status:* ${rankTitle}\n> butuh ${pointsToNextRank} point untuk mencapai rank ${nextRankTitle}`;
 };
 
-const topskor = (username) => {
-  const pointData = JSON.parse(fs.readFileSync('./DB/point.json'));
+const topskor = async (username) => {
+  const pointData = await getPointData();
   const sortedPoints = Object.entries(pointData).sort((a, b) => b[1] - a[1]);
   const top10Points = sortedPoints.slice(0, 10);
   let response = 'Berikut 10 top User:\n';
@@ -102,52 +128,47 @@ const topskor = (username) => {
     response += `- position: ${index + 1}\n- points: ${point[1]}\n- ranks: ${rankTitle}\n`;
   });
   return response;
-}
-
-const initializeFiles = () => {
-  if (!fs.existsSync('./DB/soal.json')) fs.writeFileSync('./DB/soal.json', '{}');
-  if (!fs.existsSync('./DB/nyerah.json')) fs.writeFileSync('./DB/nyerah.json', '{}');
-  if (!fs.existsSync('./DB/point.json')) fs.writeFileSync('./DB/point.json', '{}');
 };
 
-const jackpot = (username, taruhan) => {
-    if (/[^0-9]/.test(taruhan)) {
+const jackpot = async (username, taruhan) => {
+  if (/[^0-9]/.test(taruhan)) {
     return 'Taruhan tidak valid, hanya angka yang diizinkan.';
   }
 
-  let pointData = JSON.parse(fs.readFileSync('./DB/point.json'));
+  let pointData = await getPointData();
 
   if (pointData[username] < taruhan) {
     return `Maaf ${username}, point kamu tidak cukup untuk taruhan. Yuk, main *.susunkata* atau *.caklontong* dulu untuk menambah point.`;
   }
-    let emoji = ['7️⃣','🥭','🍎'];
-    let papan = Array(3).fill();
-    let comboMenang = Math.random() < 0.1;
 
-    for (let i = 0; i < 3; i++) {
-        if (comboMenang) {
-            papan[i] = 0;
-        } else {
-            papan[i] = Math.floor(Math.random() * 3);
-        }
-    }
+  let emoji = ['7️⃣','🥭','🍎'];
+  let papan = Array(3).fill();
+  let comboMenang = Math.random() < 0.1;
 
-    let hasilPapan = papan.map(i => emoji[i]).join('•');
-
-    if (comboMenang || (papan[0] === 0 && papan[1] === 0 && papan[2] === 0)) {
-        pointData[username] += taruhan * 2;
-        fs.writeFileSync('./DB/point.json', JSON.stringify(pointData));
-        return `${hasilPapan}\n\nYay! Jackpot! Selamat ${username}, kamu mendapatkan ${taruhan * 2} point.`;
+  for (let i = 0; i < 3; i++) {
+    if (comboMenang) {
+      papan[i] = 0;
     } else {
-        pointData[username] -= taruhan;
-        fs.writeFileSync('./DB/point.json', JSON.stringify(pointData));
-        return `${hasilPapan}\n\nSayang sekali, kamu belum beruntung kali ini. Point kamu berkurang ${taruhan}.`;
+      papan[i] = Math.floor(Math.random() * 3);
     }
-}
+  }
 
-const hint = (username) => {
-  const soalData = JSON.parse(fs.readFileSync('./DB/soal.json'));
-  const pointData = JSON.parse(fs.readFileSync('./DB/point.json'));
+  let hasilPapan = papan.map(i => emoji[i]).join('•');
+
+  if (comboMenang || (papan[0] === 0 && papan[1] === 0 && papan[2] === 0)) {
+    pointData[username] += taruhan * 2;
+    await savePointData(pointData);
+    return `${hasilPapan}\n\nYay! Jackpot! Selamat ${username}, kamu mendapatkan ${taruhan * 2} point.`;
+  } else {
+    pointData[username] -= taruhan;
+    await savePointData(pointData);
+    return `${hasilPapan}\n\nSayang sekali, kamu belum beruntung kali ini. Point kamu berkurang ${taruhan}.`;
+  }
+};
+
+const hint = async (username) => {
+  const soalData = await getSoalData();
+  const pointData = await getPointData();
 
   if (!soalData[username]) {
     return `Sepertinya ${username} belum mengambil soal`;
@@ -171,18 +192,17 @@ const hint = (username) => {
   }
 
   pointData[username] -= 1;
-  fs.writeFileSync('./DB/point.json', JSON.stringify(pointData));
+  await savePointData(pointData);
   return `Hint : *${hint.toUpperCase()}* .  Point di kurangi 1`;
 };
 
-//Game Nya
 const game = async (typeGame, username) => {
-  const nyerahData = JSON.parse(fs.readFileSync('./DB/nyerah.json'));
-  const soalData = JSON.parse(fs.readFileSync('./DB/soal.json'));
+  const nyerahData = await getNyerahData();
+  const soalData = await getSoalData();
 
   if (nyerahData[username]) {
     delete nyerahData[username];
-    fs.writeFileSync('./DB/nyerah.json', JSON.stringify(nyerahData));
+    await saveNyerahData(nyerahData);
   }
 
   if (!soalData[username]) {
@@ -217,7 +237,7 @@ const game = async (typeGame, username) => {
         return `Game type not supported`;
     }
     soalData[username] = soal;
-    fs.writeFileSync('./DB/soal.json', JSON.stringify(soalData));
+    await saveSoalData(soalData);
     return `Jawab soal berikut:\n*soal :* ${soal.soal}${soal.tipe ? `\n*tipe :* ${soal.tipe}` : ''}`;
   } else {
     const soal = soalData[username];
@@ -225,10 +245,10 @@ const game = async (typeGame, username) => {
   }
 };
 
-const jawabSoal = (username, jawaban) => {
-  const soalData = JSON.parse(fs.readFileSync('./DB/soal.json'));
-  const pointData = JSON.parse(fs.readFileSync('./DB/point.json'));
-  const randomNumber = 10
+const jawabSoal = async (username, jawaban) => {
+  const soalData = await getSoalData();
+  const pointData = await getPointData();
+  const randomNumber = 10;
 
   let soal;
   let pemilikSoal;
@@ -248,8 +268,8 @@ const jawabSoal = (username, jawaban) => {
   pointData[username] = (pointData[username] || 0) + randomNumber;
   const deskripsi = soal.deskripsi;
   delete soalData[pemilikSoal];
-  fs.writeFileSync('./DB/soal.json', JSON.stringify(soalData));
-  fs.writeFileSync('./DB/point.json', JSON.stringify(pointData));
+  await saveSoalData(soalData);
+  await savePointData(pointData);
 
   if (username === pemilikSoal) {
     return deskripsi ? `*Benar* ${deskripsi}. Point +${randomNumber}` : `*Benar* Kamu mendapatkan ${randomNumber} point`;
@@ -258,16 +278,16 @@ const jawabSoal = (username, jawaban) => {
   }
 };
 
-const nyerah = (username) => {
-  const pointData = JSON.parse(fs.readFileSync('./DB/point.json'));
-  const soalData = JSON.parse(fs.readFileSync('./DB/soal.json'));
+const nyerah = async (username) => {
+  const pointData = await getPointData();
+  const soalData = await getSoalData();
   if (soalData[username]) {
     const jawaban = soalData[username].jawaban; 
     delete soalData[username];
-    fs.writeFileSync('./DB/soal.json', JSON.stringify(soalData));
+    await saveSoalData(soalData);
     if (pointData[username] >= 15) {
       pointData[username] -= 2;
-      fs.writeFileSync('./DB/point.json', JSON.stringify(pointData));
+      await savePointData(pointData);
       return `*NYERAH YA* Saya akan memotong 2 point anda\n\n> *Jawaban :* ${jawaban}`;
     } else {
       return `Point kamu di bawah 15 aku gak tega motong point kamu\n\n> *Jawaban :* ${jawaban}`;
@@ -277,7 +297,4 @@ const nyerah = (username) => {
   }
 };
 
-initializeFiles();
-
 module.exports = { jackpot, hint, game, jawabSoal, skor, topskor, nyerah };
-

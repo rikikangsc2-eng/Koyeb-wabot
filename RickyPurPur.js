@@ -184,8 +184,16 @@ module.exports = sansekai = async (client, m, chatUpdate) => {
             if (m.quoted.text.includes("> mau *.nyerah* apa *.hint*") && !isCmd2) {
                 const topSkor = await gameku.jawabSoal(nomorUser, m.body);
                 const userMentions = tagUser(topSkor);
+                const response = await axios.get('https://nue-api.vercel.app/api/lgpt', {
+                                params: {
+                                    user: m.chat, 
+                                    text: m.body,
+                                    systemPrompt: '-',
+                                    aiMessage: `Pengguna menjawab soal ${m.quoted.text}, dan jawabannya adalah "${topSkor}". Beri tau pengguna bahwa jawabannya adalah "${topSkor}".`
+                                }
+                });
                 return client.sendMessage(m.chat, {
-                    text: topSkor,
+                    text: response.data.result,
                     mentions: userMentions
                 }, {
                     quoted: m
