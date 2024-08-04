@@ -187,9 +187,9 @@ module.exports = sansekai = async (client, m, chatUpdate) => {
                 const response = await axios.get('https://nue-api.vercel.app/api/lgpt', {
                                 params: {
                                     user: m.chat, 
-                                    text: m.body,
-                                    systemPrompt: '-',
-                                    aiMessage: `Pengguna menjawab soal ${m.quoted.text}, dan jawabannya adalah "${topSkor}". Beri tau pengguna bahwa jawabannya adalah "${topSkor}".`
+                                    text: "aku sudah menjawab",
+                                    systemPrompt: 'anda adalah alicia AI',
+                                    aiMessage: `Pengguna menjawab soal dalam game "${m.quoted.text}", dan jawabannya adalah "${m.body}". Beri tau pengguna bahwa jawabannya adalah "${topSkor}".`
                                 }
                 });
                 return client.sendMessage(m.chat, {
