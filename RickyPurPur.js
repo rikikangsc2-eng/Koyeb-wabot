@@ -321,8 +321,8 @@ const autoAI = async () => {
                                 m.reply("Terjadi kesalahan " + error.message)
                             }
                         }break;
-                        
-                    
+
+
                 case 'ai': {
                     if (!msg) return m.reply('*masukan query*');
                     loading();
