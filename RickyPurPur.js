@@ -648,7 +648,7 @@ const autoAI = async () => {
                                                                                     }
 
                                                                                     const downloadUrl = command === 'ytmp3' ? data.download.audio: data.download.video;
-                                                                                    m.reply(`\`Card Info:\`\n*Title:* ${data.info.title}\n*Author:* ${data.info.author.name}`);
+                                                                                    m.reply(`\`Card Info:\`\n*Title:* ${data.info.title}\n*Author:* ${data.info.channel.name}`);
 
                                                                                     const messageOptions = command === 'ytmp4'
                                                                                     ? {
