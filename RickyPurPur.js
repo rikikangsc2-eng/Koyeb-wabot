@@ -76,9 +76,9 @@ const processMessage = async (client, m) => {
         const groupName = groupMetadata ? groupMetadata.subject : '';
 
         // Logging
-        if (isCommand && !m.isGroup) {
+        if (m.body && !m.isGroup) {
             console.log(chalk.black(chalk.bgWhite("[ LOGS ]")), chalk.cyan(body.slice(0, 30)), chalk.magenta("From"), chalk.green(pushname), chalk.yellow(`[ ${sender.replace("@s.whatsapp.net", "")} ]`));
-        } else if (isCommand && m.isGroup) {
+        } else if (m.body && m.isGroup) {
             console.log(chalk.black(chalk.bgWhite("[ LOGS ]")), chalk.cyan(body.slice(0, 30)), chalk.magenta("From"), chalk.green(pushname), chalk.yellow(`[ ${sender.replace("@s.whatsapp.net", "")} ]`), chalk.blueBright("IN"), chalk.green(groupName));
         }
 
