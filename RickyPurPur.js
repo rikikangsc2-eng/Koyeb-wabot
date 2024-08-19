@@ -11,7 +11,7 @@ const BOT_GROUP = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
 const menunya = `".ai" - Untuk mengobrol dengan AI
 ".ytmp3" - Untuk mengunduh audio YouTube dari link
 ".ytmp4" - untuk mengunduh video YouTube dari link
-".menu" - untuk menampilkan menu`
+".menu" - untuk menampilkan menu fitur`
 // Function to get message body
 const getMessageBody = (m) => {
     switch (m.mtype) {
@@ -57,7 +57,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
             break;
         }
         case ".404":
-            m.reply("Untuk melakukan itu saat ini alicia belum bisa");
+            m.reply("Saat ini Aku tidak bisa melakukan itu 🗿");
             break;
             case ".ytmp4": {
                 const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
@@ -67,12 +67,12 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                         const ytmp4Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
                             params: { url: url }
                         });
-                        await client.sendMessage(m.chat, { video: { url: ytmp4Response.data.video }, mimetype: "video/mp4" }, { quoted: m });
+                        await client.sendMessage(m.chat, { video: { url: ytmp4Response.data.download.video }, mimetype: "video/mp4" }, { quoted: m });
                     } catch (error) {
                         m.reply("Terjadi kesalahan saat memproses video.");
                     }
                 } else {
-                    m.reply("Tolong masukkan URL YouTube-nya.");
+                    m.reply("Berikan link YouTube-nya dan saya akan memberikan video nya");
                 }
                 break;
             }
@@ -85,12 +85,12 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                         const ytmp3Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
                             params: { url: url }
                         });
-                        await client.sendMessage(m.chat, { audio: { url: ytmp3Response.data.audio }, mimetype: "audio/mpeg" }, { quoted: m });
+                        await client.sendMessage(m.chat, { audio: { url: ytmp3Response.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
                     } catch (error) {
                         m.reply("Terjadi kesalahan saat memproses audio.");
                     }
                 } else {
-                    m.reply("Tolong masukkan URL YouTube-nya.");
+                    m.reply("Berikan Url youtube nya dan saya akan mengirimkan audio nya");
                 }
                 break;
             }
