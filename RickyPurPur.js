@@ -60,9 +60,9 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
             m.reply("Saat ini Aku tidak bisa melakukan itu 🗿");
             break;
             case ".ytmp4": {
-                m.reply("Tungguin yaa...")
                 const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
                 if (urlMatch) {
+                    m.reply("Tungguin yaa...")
                     const url = urlMatch[0];  // Ambil URL pertama yang ditemukan
                     try {
                         const ytmp4Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
@@ -79,9 +79,9 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
             }
 
             case ".ytmp3": {
-                m.reply("Tungguin yaa...")
                 const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
                 if (urlMatch) {
+                    m.reply("Tungguin yaa...")
                     const url = urlMatch[0];  // Ambil URL pertama yang ditemukan
                     try {
                         const ytmp3Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
