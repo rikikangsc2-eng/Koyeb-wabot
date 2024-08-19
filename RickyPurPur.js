@@ -42,7 +42,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m) => {
                 params: {
                     user: "BOTLU",
                     systemPrompt: "Selamat datang di Group OBROLAN ONLINE Dengan AI",
-                    text: `CARD USER\nName: ${pushname},\nNumber:${sender.split("@")[0]}`
+                    text: `CARD USER\nName: ${pushname},\nNumber:${sender.split("@")[0]}\n----\nMessage: ${m.body}`
                 }
             });
             m.reply(`> ${cmd}\n` + aiResponse.data.result);
@@ -51,6 +51,19 @@ const handleCommandResponse = async (cmd, pushname, sender, m) => {
         case ".404":
             m.reply("Untuk melakukan itu saat ini alicia belum bisa");
             break;
+        case ".ytmp3": {
+            const url = m.body.match(/(https?:\/\/[^\s]+)/g);
+            if (url) {
+                const ytmp3Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
+                    params: {
+                        url: url[0]
+                    }
+                });
+                client.sendMessage(m.chat, {audio:{url:ytmp3Response.data.audio},mimetype:"audio/mpeg"},{quoted:m});
+            } else {
+                m.reply("Tolong masukkan url YouTube nya");
+            }
+        }break;
         default:
             m.reply("Aku belum mengerti");
             break;
