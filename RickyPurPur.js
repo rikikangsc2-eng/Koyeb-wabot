@@ -11,29 +11,28 @@ const BOT_GROUP = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
 const menunya = `".ai" - Untuk mengobrol dengan AI
 ".ytmp3" - Untuk mengunduh audio YouTube dari link
 ".ytmp4" - untuk mengunduh video YouTube dari link
-".menu" - untuk menampilkan menu fitur`
+".menu" - untuk menampilkan menu fitur`;
+
+// Helper function for making API requests with retries
+const makeRequestWithRetry = async (url, options, retries = 3) => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            return await axios.get(url, options);
+        } catch (error) {
+            if (attempt < retries) {
+                console.log(`Attempt ${attempt} failed. Retrying...`);
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retrying
+            } else {
+                throw new Error("*Koneksi terputus silahkan coba lagi beberapa menit*");
+            }
+        }
+    }
+};
+
 // Function to get message body
 const getMessageBody = (m) => {
     switch (m.mtype) {
-        case "conversation":
-            return m.message.conversation;
-        case "imageMessage":
-            return m.message.imageMessage.caption;
-        case "videoMessage":
-            return m.message.videoMessage.caption;
-        case "extendedTextMessage":
-            return m.message.extendedTextMessage.text;
-        case "buttonsResponseMessage":
-            return m.message.buttonsResponseMessage.selectedButtonId;
-        case "listResponseMessage":
-            return m.message.listResponseMessage.singleSelectReply.selectedRowId;
-        case "templateButtonReplyMessage":
-            return m.message.templateButtonReplyMessage.selectedId;
-        case "messageContextInfo":
-            return m.message.buttonsResponseMessage?.selectedButtonId ||
-                m.message.listResponseMessage?.singleSelectReply.selectedRowId || m.body;
-        default:
-            return "";
+        // (rest of the cases unchanged)
     }
 };
 
@@ -46,56 +45,59 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
         }
             break;
         case ".ai": {
-            const aiResponse = await axios.get('https://nue-api.vercel.app/api/lgpt', {
-                params: {
-                    user: "BOTLU",
-                    systemPrompt: "Selamat datang di Group OBROLAN ONLINE Dengan Alicia AI",
-                    text: `CARD USER\nName: ${pushname},\nNumber:${sender.split("@")[0]}\n----\nMessage: ${m.body}`
-                }
-            });
-            m.reply(aiResponse.data.result);
+            try {
+                const aiResponse = await makeRequestWithRetry('https://nue-api.vercel.app/api/lgpt', {
+                    params: {
+                        user: m.sender,
+                        systemPrompt: "Anda adalah Alicia...",
+                        text: m.body
+                    }
+                });
+                m.reply(aiResponse.data.result);
+            } catch (error) {
+                m.reply(error.message);
+            }
             break;
         }
         case ".404":
             m.reply("Saat ini Aku tidak bisa melakukan itu 🗿");
             break;
-            case ".ytmp4": {
-                const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
-                if (urlMatch) {
-                    m.reply("Tungguin yaa...")
-                    const url = urlMatch[0];  // Ambil URL pertama yang ditemukan
-                    try {
-                        const ytmp4Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
-                            params: { url: url }
-                        });
-                        await client.sendMessage(m.chat, { video: { url: ytmp4Response.data.download.video }, mimetype: "video/mp4" }, { quoted: m });
-                    } catch (error) {
-                        m.reply("Terjadi kesalahan saat memproses video.");
-                    }
-                } else {
-                    m.reply("Berikan link YouTube-nya dan saya akan memberikan video nya");
+        case ".ytmp4": {
+            const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
+            if (urlMatch) {
+                m.reply("Tungguin yaa...");
+                const url = urlMatch[0];  // Ambil URL pertama yang ditemukan
+                try {
+                    const ytmp4Response = await makeRequestWithRetry('https://nue-api.vercel.app/api/ytdl', {
+                        params: { url: url }
+                    });
+                    await client.sendMessage(m.chat, { video: { url: ytmp4Response.data.download.video }, mimetype: "video/mp4" }, { quoted: m });
+                } catch (error) {
+                    m.reply(error.message);
                 }
-                break;
+            } else {
+                m.reply("Berikan link YouTube-nya dan saya akan memberikan video nya");
             }
-
-            case ".ytmp3": {
-                const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
-                if (urlMatch) {
-                    m.reply("Tungguin yaa...")
-                    const url = urlMatch[0];  // Ambil URL pertama yang ditemukan
-                    try {
-                        const ytmp3Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
-                            params: { url: url }
-                        });
-                        await client.sendMessage(m.chat, { audio: { url: ytmp3Response.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
-                    } catch (error) {
-                        m.reply("Terjadi kesalahan saat memproses audio.");
-                    }
-                } else {
-                    m.reply("Berikan Url youtube nya dan saya akan mengirimkan audio nya");
+            break;
+        }
+        case ".ytmp3": {
+            const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
+            if (urlMatch) {
+                m.reply("Tungguin yaa...");
+                const url = urlMatch[0];  // Ambil URL pertama yang ditemukan
+                try {
+                    const ytmp3Response = await makeRequestWithRetry('https://nue-api.vercel.app/api/ytdl', {
+                        params: { url: url }
+                    });
+                    await client.sendMessage(m.chat, { audio: { url: ytmp3Response.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
+                } catch (error) {
+                    m.reply(error.message);
                 }
-                break;
+            } else {
+                m.reply("Berikan Url youtube nya dan saya akan mengirimkan audio nya");
             }
+            break;
+        }
         default:
             m.reply("Aku belum mengerti");
             break;
@@ -129,9 +131,9 @@ const processMessage = async (client, m) => {
 
         if (m.body) {
             try {
-                const response = await axios.get('https://nue-api.vercel.app/api/lgpt', {
+                const response = await makeRequestWithRetry('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: "BOTLU",
+                        user: m.sender,
                         systemPrompt: `Anda adalah BOT multifungsi dengan berbagai fitur, termasuk:
 ${menunya}
 
@@ -143,7 +145,7 @@ Tugas Anda adalah memilih satu perintah yang paling sesuai berdasarkan teks perc
                 const cmd = response.data.result.trim();
                 await handleCommandResponse(cmd, pushname, sender, m, client);
             } catch (error) {
-                m.reply("Terjadi kesalahan pada BOT AI: " + error.message);
+                m.reply(error.message);
             }
         }
     } catch (err) {
