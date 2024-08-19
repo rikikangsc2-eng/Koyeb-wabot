@@ -131,7 +131,7 @@ const processMessage = async (client, m) => {
             try {
                 const response = await axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: "BOTKU",
+                        user: "BOTLU",
                         systemPrompt: `Anda adalah BOT multifungsi dengan berbagai fitur, termasuk:
 ${menunya}
 
