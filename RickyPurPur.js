@@ -60,6 +60,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
             m.reply("Saat ini Aku tidak bisa melakukan itu 🗿");
             break;
             case ".ytmp4": {
+                m.reply("Tungguin yaa...")
                 const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
                 if (urlMatch) {
                     const url = urlMatch[0];  // Ambil URL pertama yang ditemukan
@@ -78,6 +79,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
             }
 
             case ".ytmp3": {
+                m.reply("Tungguin yaa...")
                 const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
                 if (urlMatch) {
                     const url = urlMatch[0];  // Ambil URL pertama yang ditemukan
