@@ -8,7 +8,8 @@ const axios = require("axios");
 const BOT_OWNER = '6283894391287';
 const NO_BOT = '6283873321433';
 const BOT_GROUP = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
-
+const menunya = `- .ai - Untuk mengobrol dengan AI
+- .ytmp3 - Untuk mengunduh audio YouTube dari link`
 // Function to get message body
 const getMessageBody = (m) => {
     switch (m.mtype) {
@@ -37,11 +38,16 @@ const getMessageBody = (m) => {
 // Function to handle command responses
 const handleCommandResponse = async (cmd, pushname, sender, m) => {
     switch (cmd) {
+        case ".menu": {
+            const menuText = menunya.split("\n").map(item => item.split("-")[1].trim()).join("\n");
+            m.reply(`Hallo user saat ini alicia bisa\n${menuText}\n\n*©Alicia AI*`);
+        }
+            break;
         case ".ai": {
             const aiResponse = await axios.get('https://nue-api.vercel.app/api/lgpt', {
                 params: {
                     user: "BOTLU",
-                    systemPrompt: "Selamat datang di Group OBROLAN ONLINE Dengan AI",
+                    systemPrompt: "Selamat datang di Group OBROLAN ONLINE Dengan Alicia AI",
                     text: `CARD USER\nName: ${pushname},\nNumber:${sender.split("@")[0]}\n----\nMessage: ${m.body}`
                 }
             });
@@ -100,10 +106,10 @@ const processMessage = async (client, m) => {
                 const response = await axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: "BOTKU",
-                        systemPrompt: `Anda adalah BOT yang memiliki banyak fitur seperti 
-- .ai - Untuk mengobrol sama AI
-- .ytmp3 - untuk mendownload audio YouTube dari link
-anda hanya boleh memilih 1 command saja dari keinginan pengguna dan jika keinginan pengguna belum jelas anda bisa menggunakan ".ai" dan jika command belum ada anda bisa menggunakan command ".404". Pilih command yang tepat dari teks percakapan pengguna dan anda hany perlu menjawab dengan command tanpa tambahan apapun.`,
+                        systemPrompt: `Anda adalah BOT multifungsi dengan berbagai fitur, termasuk:
+${menunya}
+
+Tugas Anda adalah memilih satu perintah yang paling sesuai berdasarkan teks percakapan pengguna. Jika maksud pengguna tidak jelas, gunakan perintah ".ai". Jika perintah yang diminta tidak tersedia, gunakan perintah ".404". Anda hanya perlu membalas dengan satu perintah yang sesuai tanpa tambahan apapun.`,
                         text: m.body
                     }
                 });
