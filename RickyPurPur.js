@@ -8,10 +8,10 @@ const axios = require("axios");
 const BOT_OWNER = '6283894391287';
 const NO_BOT = '6283873321433';
 const BOT_GROUP = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
-const menunya = `- .ai - Untuk mengobrol dengan AI
-- .ytmp3 - Untuk mengunduh audio YouTube dari link
-- .ytmp4 - untuk mengunduh video YouTube dari link
-- .menu - untuk menampilkan menu`
+const menunya = `".ai" - Untuk mengobrol dengan AI
+".ytmp3" - Untuk mengunduh audio YouTube dari link
+".ytmp4" - untuk mengunduh video YouTube dari link
+".menu" - untuk menampilkan menu`
 // Function to get message body
 const getMessageBody = (m) => {
     switch (m.mtype) {
@@ -41,8 +41,8 @@ const getMessageBody = (m) => {
 const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
     switch (cmd) {
         case ".menu": {
-            const menuText = menunya.split("\n").map(item => item.split("-")[1].trim()).join("\n");
-            m.reply(`Hallo user saat ini alicia bisa\n${menuText}\n\n*©Alicia AI*`);
+            const menuText = menunya.split("\n").map(item => item.split("-")[1].trim()).join("\n- ");
+            m.reply(`Hallo user saat ini alicia bisa\n- ${menuText}\n\n*©Alicia AI*`);
         }
             break;
         case ".ai": {
@@ -59,32 +59,41 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
         case ".404":
             m.reply("Untuk melakukan itu saat ini alicia belum bisa");
             break;
-        case ".ytmp4": {
-            const url = m.body.match(/(https?:\/\/[^\s]+)/g);
-            if (url) {
-                const ytmp4Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
-                    params: {
-                        url: url[0]
+            case ".ytmp4": {
+                const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
+                if (urlMatch) {
+                    const url = urlMatch[0];  // Ambil URL pertama yang ditemukan
+                    try {
+                        const ytmp4Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
+                            params: { url: url }
+                        });
+                        await client.sendMessage(m.chat, { video: { url: ytmp4Response.data.video }, mimetype: "video/mp4" }, { quoted: m });
+                    } catch (error) {
+                        m.reply("Terjadi kesalahan saat memproses video.");
                     }
-                });
-                client.sendMessage(m.chat, {video:{url:ytmp4Response.data.video},mimetype:"video/mp4"},{quoted:m});
-            } else {
-                m.reply("Tolong masukkan url YouTube nya");
+                } else {
+                    m.reply("Tolong masukkan URL YouTube-nya.");
+                }
+                break;
             }
-        }break;
-        case ".ytmp3": {
-            const url = m.body.match(/(https?:\/\/[^\s]+)/g);
-            if (url) {
-                const ytmp3Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
-                    params: {
-                        url: url[0]
+
+            case ".ytmp3": {
+                const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
+                if (urlMatch) {
+                    const url = urlMatch[0];  // Ambil URL pertama yang ditemukan
+                    try {
+                        const ytmp3Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
+                            params: { url: url }
+                        });
+                        await client.sendMessage(m.chat, { audio: { url: ytmp3Response.data.audio }, mimetype: "audio/mpeg" }, { quoted: m });
+                    } catch (error) {
+                        m.reply("Terjadi kesalahan saat memproses audio.");
                     }
-                });
-                client.sendMessage(m.chat, {audio:{url:ytmp3Response.data.audio},mimetype:"audio/mpeg"},{quoted:m});
-            } else {
-                m.reply("Tolong masukkan url YouTube nya");
+                } else {
+                    m.reply("Tolong masukkan URL YouTube-nya.");
+                }
+                break;
             }
-        }break;
         default:
             m.reply("Aku belum mengerti");
             break;
