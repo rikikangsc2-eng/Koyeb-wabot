@@ -22,6 +22,7 @@ const makeRequestWithRetry = async (url, options, retries = 3) => {
             if (attempt < retries) {
                 console.log(`Attempt ${attempt} failed. Retrying...`);
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retrying
+                m.reply("*Menghubungkan kembali dengan Alicia...*");
             } else {
                 throw new Error("*Koneksi terputus silahkan coba lagi beberapa menit*");
             }
@@ -42,18 +43,23 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
         case ".menu": {
             const menuText = menunya.split("\n").map(item => item.split("-")[1].trim()).join("\n- ");
             m.reply(`Hallo user saat ini alicia bisa\n- ${menuText}\n\n*©Alicia AI*`);
-        }
             break;
+        }
         case ".ai": {
             try {
                 const aiResponse = await makeRequestWithRetry('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
                         systemPrompt: "Anda adalah Alicia...",
-                        text: m.body
+                        text: `CARD USER\nName: ${pushname},\nNumber:${sender.split("@")[0]}\n----\nMessage: ${m.body}`
                     }
                 });
-                m.reply(aiResponse.data.result);
+
+                if (aiResponse && aiResponse.data && aiResponse.data.result) {
+                    m.reply(aiResponse.data.result);
+                } else {
+                    m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
+                }
             } catch (error) {
                 m.reply(error.message);
             }
@@ -71,7 +77,12 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                     const ytmp4Response = await makeRequestWithRetry('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: url }
                     });
-                    await client.sendMessage(m.chat, { video: { url: ytmp4Response.data.download.video }, mimetype: "video/mp4" }, { quoted: m });
+
+                    if (ytmp4Response && ytmp4Response.data && ytmp4Response.data.download && ytmp4Response.data.download.video) {
+                        await client.sendMessage(m.chat, { video: { url: ytmp4Response.data.download.video }, mimetype: "video/mp4" }, { quoted: m });
+                    } else {
+                        m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
+                    }
                 } catch (error) {
                     m.reply(error.message);
                 }
@@ -89,7 +100,12 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                     const ytmp3Response = await makeRequestWithRetry('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: url }
                     });
-                    await client.sendMessage(m.chat, { audio: { url: ytmp3Response.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
+
+                    if (ytmp3Response && ytmp3Response.data && ytmp3Response.data.download && ytmp3Response.data.download.audio) {
+                        await client.sendMessage(m.chat, { audio: { url: ytmp3Response.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
+                    } else {
+                        m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
+                    }
                 } catch (error) {
                     m.reply(error.message);
                 }
@@ -142,8 +158,12 @@ Tugas Anda adalah memilih satu perintah yang paling sesuai berdasarkan teks perc
                     }
                 });
 
-                const cmd = response.data.result.trim();
-                await handleCommandResponse(cmd, pushname, sender, m, client);
+                if (response && response.data && response.data.result) {
+                    const cmd = response.data.result.trim();
+                    await handleCommandResponse(cmd, pushname, sender, m, client);
+                } else {
+                    m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
+                }
             } catch (error) {
                 m.reply(error.message);
             }
