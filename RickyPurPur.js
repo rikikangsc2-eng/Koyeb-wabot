@@ -9,11 +9,17 @@ const BOT_OWNER = '6283894391287';
 const NO_BOT = '6283873321433';
 const BOT_GROUP = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
 const menunya = `".ai" - Untuk mengobrol dengan AI
-".ytmp3" - Untuk mengunduh audio YouTube dari link
+syarat: Obrolan/pertanyaan
+".ytmp3" - Untuk mengunduh audio 
+syarat: link youtube
 ".ytmp4" - untuk mengunduh video YouTube dari link
+syarat: link youtube
 ".menu" - untuk menampilkan menu fitur
+syarat: menanyakan fitur
 ".play" - untuk memutar musik dari judul
-".owner" - untuk menampilkan informasi tentang owner`;
+syarat: judul lagu
+".owner" - untuk menampilkan informasi tentang owner
+syarat: menanyakan informasi pembuat bot`;
 
 // Function to get message body
 const getMessageBody = (m) => {
@@ -179,15 +185,14 @@ const processMessage = async (client, m) => {
                 const response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: `Anda adalah BOT multifungsi dengan berbagai fitur, termasuk:
+                        systemPrompt: `Anda adalah BOT multifungsi dengan berbagai fitur, termasuk: 
 ${menunya}
-
-Tugas Anda adalah memilih satu perintah yang paling sesuai berdasarkan teks percakapan pengguna. Jika maksud pengguna tidak jelas, gunakan perintah ".ai". Jika perintah yang diminta tidak tersedia, gunakan perintah ".404". Anda hanya perlu membalas dengan satu perintah yang sesuai tanpa tambahan apapun.`,
+Tugas Anda adalah memilih satu perintah yang paling sesuai berdasarkan teks percakapan pengguna. Jika syarat dari pengguna belum terpenuhi atau perintahnya tidak jelas, balas dengan penjelasan agar pengguna memenuhi syarat tersebut. Jika perintah yang diminta tidak tersedia, balas dengan ".404". Jawab hanya dengan satu perintah yang sesuai, tanpa tambahan apapun.`,
                         text: m.body
                     }
                 }));
-
                 const cmd = response.data.result.trim();
+                if (!cmd.startsWith(".")) return m.reply(response.data.result);
                 await handleCommandResponse(cmd, pushname, sender, m, client);
             } catch (error) {
                 m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
