@@ -11,7 +11,9 @@ const BOT_GROUP = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
 const menunya = `".ai" - Untuk mengobrol dengan AI
 ".ytmp3" - Untuk mengunduh audio YouTube dari link
 ".ytmp4" - untuk mengunduh video YouTube dari link
-".menu" - untuk menampilkan menu fitur`;
+".menu" - untuk menampilkan menu fitur
+".play" - untuk memutar musik dari judul
+".owner" - untuk menampilkan informasi tentang owner`;
 
 // Function to get message body
 const getMessageBody = (m) => {
@@ -56,6 +58,32 @@ const retryRequest = async (requestFunction, retries = 3) => {
 // Function to handle command responses
 const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
     switch (cmd) {
+        case ".play": {
+            try {
+                const query = m.body;
+                const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
+                    params: {
+                        user: m.sender,
+                        systemPrompt: "Kamu adalah AI yang tugasnya memberikan judul lagu dari teks yang diberikan, jika teks terlalu pendek atau tidak jelas berikan 'null', jika teks sudah jelas ambil judul lagu nya. Jangan ada tambahan teks yang tidak perlu.",
+                        text: `${query}`
+                    }
+                }));
+                if (aiResponse.data.result === "null") {
+                    m.reply("Mohon sertakan judul lagu yang valid");
+                } else {
+                    m.reply(`Saya sedang mencari judul lagu "${aiResponse.data.result}"...`);
+                    const playResponse = await retryRequest(() => axios.get(`https://nue-api.vercel.app/api/play?query=${aiResponse.data.result}`));
+                    await client.sendMessage(m.chat, { audio: { url: playResponse.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
+                }
+            } catch (error) {
+                m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
+            }
+            break;
+        }
+        case ".owner": {
+            m.reply(`Halo, saya Alicia! Saya dibuat dan di urus oleh ${BOT_OWNER}. AI canggih multifungsi dan serba guna`);
+            break;
+        }
         case ".menu": {
             const menuText = menunya.split("\n").map(item => item.split("-")[1].trim()).join("\n- ");
             m.reply(`Hallo user saat ini alicia bisa\n- ${menuText}\n\n*©Alicia AI*`);
