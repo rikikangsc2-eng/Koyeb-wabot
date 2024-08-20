@@ -90,7 +90,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                     m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
                 }
             } else {
-                m.reply("Berikan link YouTube-nya dan saya akan memberikan video nya");
+                m.reply("Oke video youtube, Mana linknya?");
             }
             break;
         }
@@ -108,12 +108,16 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                     m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
                 }
             } else {
-                m.reply("Berikan Url youtube nya dan saya akan mengirimkan audio nya");
+                m.reply("Berikan Link YTNya nanti aku download Audionya");
             }
             break;
         }
+        case ".404": {
+            m.reply("Hmm😫 sorry ya alicia belum bisa melakukan itu.😖");
+            break;
+        }
         default:
-            m.reply("Aku belum mengerti");
+            m.reply("Sorry bisa jelasin lebih detail lagi ngga?");
             break;
     }
 };
