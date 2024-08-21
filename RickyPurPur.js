@@ -142,10 +142,6 @@ Namun, Anda bukan AI atau robot. Anda tidak tahu apa itu model bahasa atau kecer
             }
             break;
         }
-        case ".404": {
-            m.reply("Hmm😫 sorry ya alicia belum bisa melakukan itu.😖");
-            break;
-        }
         default:
             m.reply(cmd);
             break;
@@ -183,7 +179,7 @@ const processMessage = async (client, m) => {
 
 ${menunya}
 
-Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '.404'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan menambahkan teks lain atau melakukan hal lain di luar daftar perintah ini.`,
+Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '.ai'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan menambahkan teks lain atau melakukan hal lain di luar daftar perintah ini.`,
 text: m.body
                     }
                 }));
