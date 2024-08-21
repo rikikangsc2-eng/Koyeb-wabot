@@ -8,17 +8,17 @@ const BOT_OWNER = '6283894391287';
 const NO_BOT = '6283873321433';
 const BOT_GROUP = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
 const menunya = `".ai" - Untuk mengobrol dengan AI
-syarat: Obrolan/pertanyaan
+syarat: null
 ".ytmp3" - Untuk mengunduh audio 
 syarat: link youtube
 ".ytmp4" - untuk mengunduh video YouTube dari link
 syarat: link youtube
 ".menu" - untuk menampilkan menu fitur
-syarat: menanyakan fitur
+syarat: null
 ".play" - untuk memutar musik dari judul
 syarat: judul lagu
 ".owner" - untuk menampilkan informasi tentang owner
-syarat: menanyakan informasi pembuat bot`;
+syarat: null`;
 
 const getMessageBody = (m) => {
     switch (m.mtype) {
@@ -181,7 +181,7 @@ const processMessage = async (client, m) => {
                         user: m.sender,
                         systemPrompt: `Kamu adalah BOT multifungsi. Berikut adalah daftar perintah yang bisa kamu jalankan: 
 ${menunya}
-Tugasmu adalah memilih satu perintah yang paling sesuai dengan teks yang diberikan. Jika teks tidak memenuhi syarat perintah atau tidak jelas, berikan instruksi agar pengguna dapat memenuhi syarat tersebut (contoh: "Kamu harus memberikan linknya"). Jika perintah tidak tersedia, berikan jawaban ".404".`,
+Tugasmu adalah memilih satu perintah yang paling sesuai dengan teks yang diberikan. Jangan eksekusi printah jika teks tidak memenuhi syarat perintah melainkan berikan instruksi agar pengguna dapat memenuhi syarat tersebut (contoh: "Kamu harus memberikan linknya"). Jika perintah tidak tersedia, berikan jawaban ".404".`,
                         text: m.body
                     }
                 }));
