@@ -151,7 +151,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
             break;
         }
         default:
-            m.reply("Sorry bisa jelasin lebih detail lagi ngga?");
+            m.reply(cmd);
             break;
     }
 };
@@ -187,12 +187,11 @@ const processMessage = async (client, m) => {
                         user: m.sender,
                         systemPrompt: `Anda adalah BOT multifungsi dengan berbagai fitur, termasuk: 
 ${menunya}
-Tugas Anda adalah memilih satu perintah yang paling sesuai berdasarkan teks percakapan pengguna. Jika syarat dari pengguna belum terpenuhi atau perintahnya tidak jelas, balas dengan penjelasan agar pengguna memenuhi syarat tersebut. Jika perintah yang diminta tidak tersedia, balas dengan ".404". Jawab hanya dengan satu perintah yang sesuai, tanpa tambahan apapun.`,
+Tugas Anda adalah memilih satu perintah yang paling sesuai berdasarkan teks percakapan pengguna. Jika syarat dari pengguna belum terpenuhi atau perintahnya tidak jelas, balas dengan penjelasan agar pengguna memenuhi syarat tersebut (ex: "Berikan linknya"). Jika perintah yang diminta tidak tersedia, balas dengan ".404". Jawab hanya dengan satu perintah yang sesuai, tanpa tambahan apapun.`,
                         text: m.body
                     }
                 }));
-                const cmd = response.data.result.trim();
-                if (!cmd.startsWith(".")) return m.reply(response.data.result);
+           const cmd = response.data.result.trim();
                 await handleCommandResponse(cmd, pushname, sender, m, client);
             } catch (error) {
                 m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
