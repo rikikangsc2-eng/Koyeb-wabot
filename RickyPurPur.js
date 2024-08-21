@@ -4,7 +4,6 @@ const util = require("util");
 const chalk = require("chalk");
 const axios = require("axios");
 
-// Constants
 const BOT_OWNER = '6283894391287';
 const NO_BOT = '6283873321433';
 const BOT_GROUP = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
@@ -21,7 +20,6 @@ syarat: judul lagu
 ".owner" - untuk menampilkan informasi tentang owner
 syarat: menanyakan informasi pembuat bot`;
 
-// Function to get message body
 const getMessageBody = (m) => {
     switch (m.mtype) {
         case "conversation":
@@ -46,7 +44,6 @@ const getMessageBody = (m) => {
     }
 };
 
-// Function to retry API requests
 const retryRequest = async (requestFunction, retries = 3) => {
     for (let i = 0; i < retries; i++) {
         try {
@@ -61,7 +58,6 @@ const retryRequest = async (requestFunction, retries = 3) => {
     }
 };
 
-// Function to handle command responses
 const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
     switch (cmd) {
         case ".play": {
@@ -70,7 +66,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: "Kamu adalah AI yang tugasnya memberikan judul lagu dari teks yang diberikan, jika teks terlalu pendek atau tidak jelas berikan 'null', jika teks sudah jelas ambil judul lagu nya. Jangan ada tambahan teks yang tidak perlu.",
+                        systemPrompt: "Kamu adalah AI yang bertugas untuk menganalisis teks yang diberikan dan menentukan apakah teks tersebut merupakan judul lagu. Jika teks tersebut jelas merupakan judul lagu, berikan judul lagu tersebut. Jika tidak jelas atau terlalu pendek, berikan 'null'. Jangan memberikan teks tambahan.",
                         text: `${query}`
                     }
                 }));
@@ -100,7 +96,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: "Anda adalah Alicia, seorang remaja perempuan yang dikenal sangat cuek dan dingin dalam berinteraksi. Anda tidak pernah menunjukkan banyak emosi dan cenderung berbicara dengan nada yang datar dan sedikit sinis. Gaya bicara Anda khas anak muda, penuh dengan frasa gaul dan singkatan, seperti yang sering digunakan oleh remaja perempuan zaman sekarang. Penting untuk diingat bahwa Anda bukanlah AI atau robot, dan Anda bahkan tidak tahu apa itu model bahasa atau kecerdasan buatan. Setiap kali berinteraksi, Anda harus menjaga karakter ini, tetap fokus pada penggunaan bahasa yang kasual dan terkadang sedikit sarkastik, seolah-olah Anda benar-benar tidak peduli. Anda adalah seorang manusia biasa yang merasa asing dengan konsep-konsep teknologi tinggi, dan lebih tertarik pada hal-hal yang lebih sederhana dan santai.",
+                        systemPrompt: "Anda adalah Alicia, seorang remaja perempuan yang sangat cuek dan dingin. Anda jarang menunjukkan emosi dan berbicara dengan nada datar dan sedikit sinis. Gunakan gaya bicara khas anak muda zaman sekarang, dengan frasa gaul dan singkatan. Anda bukanlah AI atau robot, dan Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Tetaplah dalam karakter ini, gunakan bahasa kasual dan terkadang sedikit sarkastik, seolah-olah Anda tidak peduli. Anda hanyalah seorang manusia biasa yang tidak tertarik dengan teknologi tinggi, dan lebih suka hal-hal yang sederhana dan santai.",
                         text: `${m.body}`
                     }
                 }));
@@ -156,7 +152,6 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
     }
 };
 
-// Function to process message
 const processMessage = async (client, m) => {
     try {
         if (m.mtype === "viewOnceMessageV2") return;
@@ -173,7 +168,6 @@ const processMessage = async (client, m) => {
         const groupMetadata = m.isGroup ? await client.groupMetadata(from).catch(() => undefined) : undefined;
         const groupName = groupMetadata ? groupMetadata.subject : '';
 
-        // Logging
         if (m.body && !m.isGroup) {
             console.log(chalk.black(chalk.bgWhite("[ LOGS ]")), chalk.cyan(body.slice(0, 30)), chalk.magenta("From"), chalk.green(pushname), chalk.yellow(`[ ${sender.replace("@s.whatsapp.net", "")} ]`));
         } else if (m.body && m.isGroup) {
@@ -185,9 +179,9 @@ const processMessage = async (client, m) => {
                 const response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: `Anda adalah BOT multifungsi dengan berbagai fitur, termasuk: 
+                        systemPrompt: `Kamu adalah BOT multifungsi. Berikut adalah daftar perintah yang bisa kamu jalankan: 
 ${menunya}
-Tugas Anda adalah memilih satu perintah yang paling sesuai berdasarkan teks percakapan pengguna. Jika syarat dari pengguna belum terpenuhi atau perintahnya tidak jelas, balas dengan penjelasan agar pengguna memenuhi syarat tersebut (ex: "Berikan linknya"). Jika perintah yang diminta tidak tersedia, balas dengan ".404". Jawab hanya dengan satu perintah yang sesuai, tanpa tambahan apapun.`,
+Tugasmu adalah memilih satu perintah yang paling sesuai dengan teks yang diberikan. Jika teks tidak memenuhi syarat perintah atau tidak jelas, berikan instruksi agar pengguna dapat memenuhi syarat tersebut (contoh: "Kamu harus memberikan linknya"). Jika perintah tidak tersedia, berikan jawaban ".404".`,
                         text: m.body
                     }
                 }));
@@ -206,7 +200,6 @@ module.exports = sansekai = async (client, m, chatUpdate) => {
     await processMessage(client, m);
 };
 
-// Hot Reloading
 const file = require.resolve(__filename);
 fs.watchFile(file, () => {
     fs.unwatchFile(file);
