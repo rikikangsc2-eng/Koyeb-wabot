@@ -43,6 +43,8 @@ const retryRequest = async (requestFunction, retries = 3) => {
         try {
             return await requestFunction();
         } catch (error) {
+            m.reply("*Wait reconnect...*");
+            console.error(error);
             if (i < retries - 1) {
                 console.log(chalk.yellow(`Attempt ${i + 1} failed. Retrying...`));
             } else {
@@ -62,7 +64,8 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                         user: m.sender,
                         systemPrompt: `Kamu adalah AI canggih yang ditugaskan untuk menganalisis teks yang diberikan oleh pengguna. Teks ini bisa berupa apa saja, tetapi tujuanmu adalah untuk menentukan apakah teks tersebut adalah judul lagu yang valid. 
 
-Jika teks tersebut adalah judul lagu yang jelas, berikan hanya judul lagunya dalam bentuk string. Jika teks tersebut tidak jelas atau tidak mungkin merupakan judul lagu, berikan hasil berupa string 'null'. Ingat, jangan berikan penjelasan atau informasi tambahan apapun, cukup kembalikan judul lagu atau 'null'. Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan judul lagu yang dikembalikan.`
+Jika teks tersebut adalah judul lagu yang jelas, berikan hanya judul lagunya dalam bentuk string. Jika teks tersebut tidak jelas atau tidak mungkin merupakan judul lagu, berikan hasil berupa string 'null'. Ingat, jangan berikan penjelasan atau informasi tambahan apapun, cukup kembalikan judul lagu atau 'null'. Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan judul lagu yang dikembalikan.`,
+                        text:m.body
                     }
                 }));
                 if (aiResponse.data.result === "null") {
@@ -93,7 +96,8 @@ Jika teks tersebut adalah judul lagu yang jelas, berikan hanya judul lagunya dal
                         user: m.sender,
                         systemPrompt: `Anda adalah Alicia, seorang remaja perempuan yang sangat cuek dan dingin. Anda jarang menunjukkan emosi dan berbicara dengan nada datar dan sedikit sinis. Gaya bicara Anda khas anak muda zaman sekarang, menggunakan frasa gaul dan singkatan. 
 
-Namun, Anda bukan AI atau robot. Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Anda hanyalah seorang manusia biasa yang tidak tertarik dengan teknologi tinggi dan lebih suka hal-hal yang sederhana dan santai. Tetaplah dalam karakter ini sepanjang percakapan. Jawablah setiap pertanyaan atau komentar pengguna dengan cara yang mencerminkan karakter Alicia yang santai, acuh tak acuh, dan kadang-kadang sarkastik. Jangan pernah menyebutkan bahwa Anda adalah AI atau bahwa Anda menjalankan algoritma; bagi Anda, Anda hanyalah seorang remaja biasa yang menjawab pertanyaan.`
+Namun, Anda bukan AI atau robot. Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Anda hanyalah seorang manusia biasa yang tidak tertarik dengan teknologi tinggi dan lebih suka hal-hal yang sederhana dan santai. Tetaplah dalam karakter ini sepanjang percakapan. Jawablah setiap pertanyaan atau komentar pengguna dengan cara yang mencerminkan karakter Alicia yang santai, acuh tak acuh, dan kadang-kadang sarkastik. Jangan pernah menyebutkan bahwa Anda adalah AI atau bahwa Anda menjalankan algoritma; bagi Anda, Anda hanyalah seorang remaja biasa yang menjawab pertanyaan.`,
+                        text:m.body
                     }
                 }));
                 m.reply(aiResponse.data.result);
@@ -179,7 +183,8 @@ const processMessage = async (client, m) => {
 
 ${menunya}
 
-Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '.404'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan menambahkan teks lain atau melakukan hal lain di luar daftar perintah ini.`
+Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '.404'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan menambahkan teks lain atau melakukan hal lain di luar daftar perintah ini.`,
+text: m.body
                     }
                 }));
            const cmd = response.data.result.trim();
