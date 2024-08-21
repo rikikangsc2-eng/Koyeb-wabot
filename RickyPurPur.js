@@ -7,18 +7,12 @@ const axios = require("axios");
 const BOT_OWNER = '6283894391287';
 const NO_BOT = '6283873321433';
 const BOT_GROUP = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
-const menunya = `".ai" - Untuk mengobrol dengan AI
-syarat: null
-".ytmp3" - Untuk mengunduh audio 
-syarat: link youtube
-".ytmp4" - untuk mengunduh video YouTube dari link
-syarat: link youtube
-".menu" - untuk menampilkan menu fitur
-syarat: null
-".play" - untuk memutar musik dari judul
-syarat: judul lagu
-".owner" - untuk menampilkan informasi tentang owner
-syarat: null`;
+const menunya = `1. ".ai" - Untuk mengobrol atau bertanya dengan AI.
+2. ".ytmp3" - Untuk mengunduh audio dari link YouTube yang diberikan.
+3. ".ytmp4" - Untuk mengunduh video dari link YouTube yang diberikan.
+4. ".menu" - Untuk menampilkan menu fitur yang tersedia.
+5. ".play" - Untuk memutar musik berdasarkan judul yang diberikan oleh pengguna.
+6. ".owner" - Untuk menampilkan informasi tentang owner bot.`;
 
 const getMessageBody = (m) => {
     switch (m.mtype) {
@@ -66,8 +60,9 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: "Kamu adalah AI yang bertugas untuk menganalisis teks yang diberikan dan menentukan apakah teks tersebut merupakan judul lagu. Jika teks tersebut jelas merupakan judul lagu, berikan judul lagu tersebut. Jika tidak jelas atau terlalu pendek, berikan 'null'. Jangan memberikan teks tambahan.",
-                        text: `${query}`
+                        systemPrompt: `Kamu adalah AI canggih yang ditugaskan untuk menganalisis teks yang diberikan oleh pengguna. Teks ini bisa berupa apa saja, tetapi tujuanmu adalah untuk menentukan apakah teks tersebut adalah judul lagu yang valid. 
+
+Jika teks tersebut adalah judul lagu yang jelas, berikan hanya judul lagunya dalam bentuk string. Jika teks tersebut tidak jelas atau tidak mungkin merupakan judul lagu, berikan hasil berupa string 'null'. Ingat, jangan berikan penjelasan atau informasi tambahan apapun, cukup kembalikan judul lagu atau 'null'. Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan judul lagu yang dikembalikan.`
                     }
                 }));
                 if (aiResponse.data.result === "null") {
@@ -87,7 +82,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
             break;
         }
         case ".menu": {
-            const menuText = menunya.split("\n").map(item => item.split("-")[1].trim()).join("\n- ");
+            const menuText = menunya.split("\n").map(item => item.split("-")[1].trim()).join(`\n- `);
             m.reply(`Hallo user saat ini alicia bisa\n- ${menuText}\n\n*©Alicia AI*`);
             break;
         }
@@ -96,8 +91,9 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: "Anda adalah Alicia, seorang remaja perempuan yang sangat cuek dan dingin. Anda jarang menunjukkan emosi dan berbicara dengan nada datar dan sedikit sinis. Gunakan gaya bicara khas anak muda zaman sekarang, dengan frasa gaul dan singkatan. Anda bukanlah AI atau robot, dan Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Tetaplah dalam karakter ini, gunakan bahasa kasual dan terkadang sedikit sarkastik, seolah-olah Anda tidak peduli. Anda hanyalah seorang manusia biasa yang tidak tertarik dengan teknologi tinggi, dan lebih suka hal-hal yang sederhana dan santai.",
-                        text: `${m.body}`
+                        systemPrompt: `Anda adalah Alicia, seorang remaja perempuan yang sangat cuek dan dingin. Anda jarang menunjukkan emosi dan berbicara dengan nada datar dan sedikit sinis. Gaya bicara Anda khas anak muda zaman sekarang, menggunakan frasa gaul dan singkatan. 
+
+Namun, Anda bukan AI atau robot. Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Anda hanyalah seorang manusia biasa yang tidak tertarik dengan teknologi tinggi dan lebih suka hal-hal yang sederhana dan santai. Tetaplah dalam karakter ini sepanjang percakapan. Jawablah setiap pertanyaan atau komentar pengguna dengan cara yang mencerminkan karakter Alicia yang santai, acuh tak acuh, dan kadang-kadang sarkastik. Jangan pernah menyebutkan bahwa Anda adalah AI atau bahwa Anda menjalankan algoritma; bagi Anda, Anda hanyalah seorang remaja biasa yang menjawab pertanyaan.`
                     }
                 }));
                 m.reply(aiResponse.data.result);
@@ -179,10 +175,11 @@ const processMessage = async (client, m) => {
                 const response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: `Kamu adalah BOT multifungsi. Berikut adalah daftar perintah yang bisa kamu jalankan: 
+                        systemPrompt: `Kamu adalah BOT multifungsi yang dirancang untuk menangani berbagai perintah yang mungkin diberikan oleh pengguna. Berikut adalah daftar perintah yang bisa kamu jalankan:
+
 ${menunya}
-Tugasmu adalah memilih satu perintah yang paling sesuai dengan teks yang diberikan. Jangan eksekusi printah jika teks tidak memenuhi syarat perintah melainkan berikan instruksi agar pengguna dapat memenuhi syarat tersebut (contoh: "Kamu harus memberikan linknya"). Jika perintah tidak tersedia, berikan jawaban ".404".`,
-                        text: m.body
+
+Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '.404'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan menambahkan teks lain atau melakukan hal lain di luar daftar perintah ini.`
                     }
                 }));
            const cmd = response.data.result.trim();
