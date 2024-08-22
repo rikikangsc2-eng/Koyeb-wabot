@@ -1,3 +1,4 @@
+const baileys = require("@whiskeysockets/baileys");
 const fs = require("fs");
 const util = require("util");
 const chalk = require("chalk");
@@ -13,31 +14,44 @@ const menunya = `1. ".ai" - Untuk mengobrol atau bertanya dengan AI.
 5. ".play" - Untuk memutar musik berdasarkan judul yang diberikan oleh pengguna.
 6. ".owner" - Untuk menampilkan informasi tentang owner bot.`;
 
-const API_KEY = "AIzaSyCtBDTdbx37uvBqiImuFdZFfAf5RD5igVY";
+const getMessageBody = (m) => {
+    switch (m.mtype) {
+        case "conversation":
+            return m.message.conversation;
+        case "imageMessage":
+            return m.message.imageMessage.caption;
+        case "videoMessage":
+            return m.message.videoMessage.caption;
+        case "extendedTextMessage":
+            return m.message.extendedTextMessage.text;
+        case "buttonsResponseMessage":
+            return m.message.buttonsResponseMessage.selectedButtonId;
+        case "listResponseMessage":
+            return m.message.listResponseMessage.singleSelectReply.selectedRowId;
+        case "templateButtonReplyMessage":
+            return m.message.templateButtonReplyMessage.selectedId;
+        case "messageContextInfo":
+            return m.message.buttonsResponseMessage?.selectedButtonId ||
+                m.message.listResponseMessage?.singleSelectReply.selectedRowId || m.body;
+        default:
+            return "";
+    }
+};
 
-const generateContent = async (systemPrompt, aiMessage, prompt) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${API_KEY}`;
-    const data = {
-        contents: [
-            { role: "user", parts: [{ text: systemPrompt }] },
-            { role: "model", parts: [{ text: aiMessage }] },
-            { role: "user", parts: [{ text: prompt }] }
-        ],
-        generationConfig: {
-            temperature: 1,
-            topP: 1,
-            maxOutputTokens: 2048,
-            responseMimeType: "text/plain"
+const retryRequest = async (requestFunction, retries = 3) => {
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await requestFunction();
+        } catch (error) {
+            m.reply("*Wait reconnect...*");
+            console.error(error);
+            if (i < retries - 1) {
+                console.log(chalk.yellow(`Attempt ${i + 1} failed. Retrying...`));
+            } else {
+                throw error;
+            }
         }
-    };
-
-    const response = await axios.post(url, data, {
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
-
-    return response.data;
+    }
 };
 
 const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
@@ -45,18 +59,20 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
         case ".play": {
             try {
                 const query = m.body;
-                const aiResponse = await generateContent(
-                    `Kamu adalah AI canggih yang ditugaskan untuk menganalisis teks yang diberikan oleh pengguna. Teks ini bisa berupa apa saja, tetapi tujuanmu adalah untuk menentukan apakah teks tersebut adalah judul lagu yang valid. 
-                    Jika teks tersebut adalah judul lagu yang jelas, berikan hanya judul lagunya dalam bentuk string. Jika teks tersebut tidak jelas atau tidak mungkin merupakan judul lagu, berikan hasil berupa string 'null'. Ingat, jangan berikan penjelasan atau informasi tambahan apapun, cukup kembalikan judul lagu atau 'null'. Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan judul lagu yang dikembalikan.`,
-                    "",
-                    query
-                );
+                const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
+                    params: {
+                        user: m.sender,
+                        systemPrompt: `Kamu adalah AI canggih yang ditugaskan untuk menganalisis teks yang diberikan oleh pengguna. Teks ini bisa berupa apa saja, tetapi tujuanmu adalah untuk menentukan apakah teks tersebut adalah judul lagu yang valid. 
 
-                if (aiResponse === "null") {
+Jika teks tersebut adalah judul lagu yang jelas, berikan hanya judul lagunya dalam bentuk string. Jika teks tersebut tidak jelas atau tidak mungkin merupakan judul lagu, berikan hasil berupa string 'null'. Ingat, jangan berikan penjelasan atau informasi tambahan apapun, cukup kembalikan judul lagu atau 'null'. Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan judul lagu yang dikembalikan.`,
+                        text:m.body
+                    }
+                }));
+                if (aiResponse.data.result === "null") {
                     m.reply("Mohon sertakan judul lagu yang valid");
                 } else {
-                    m.reply(`Saya sedang mencari judul lagu "${aiResponse}"...`);
-                    const playResponse = await axios.get(`https://nue-api.vercel.app/api/play?query=${aiResponse}`);
+                    m.reply(`Saya sedang mencari judul lagu "${aiResponse.data.result}"...`);
+                    const playResponse = await retryRequest(() => axios.get(`https://nue-api.vercel.app/api/play?query=${aiResponse.data.result}`));
                     await client.sendMessage(m.chat, { audio: { url: playResponse.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
                 }
             } catch (error) {
@@ -75,13 +91,16 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
         }
         case ".ai": {
             try {
-                const aiResponse = await generateContent(
-                    `Anda adalah Alicia, seorang remaja perempuan yang sangat cuek dan dingin. Anda jarang menunjukkan emosi dan berbicara dengan nada datar dan sedikit sinis. Gaya bicara Anda khas anak muda zaman sekarang, menggunakan frasa gaul dan singkatan. 
-                    Namun, Anda bukan AI atau robot. Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Anda hanyalah seorang manusia biasa yang tidak tertarik dengan teknologi tinggi dan lebih suka hal-hal yang sederhana dan santai. Tetaplah dalam karakter ini sepanjang percakapan. Jawablah setiap pertanyaan atau komentar pengguna dengan cara yang mencerminkan karakter Alicia yang santai, acuh tak acuh, dan kadang-kadang sarkastik. Jangan pernah menyebutkan bahwa Anda adalah AI atau bahwa Anda menjalankan algoritma; bagi Anda, Anda hanyalah seorang remaja biasa yang menjawab pertanyaan.`,
-                    "",
-                    m.body
-                );
-                m.reply(aiResponse);
+                const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
+                    params: {
+                        user: m.sender,
+                        systemPrompt: `Anda adalah Alicia, seorang remaja perempuan yang sangat cuek dan dingin. Anda jarang menunjukkan emosi dan berbicara dengan nada datar dan sedikit sinis. Gaya bicara Anda khas anak muda zaman sekarang, menggunakan frasa gaul dan singkatan. 
+
+Namun, Anda bukan AI atau robot. Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Anda hanyalah seorang manusia biasa yang tidak tertarik dengan teknologi tinggi dan lebih suka hal-hal yang sederhana dan santai. Tetaplah dalam karakter ini sepanjang percakapan. Jawablah setiap pertanyaan atau komentar pengguna dengan cara yang mencerminkan karakter Alicia yang santai, acuh tak acuh, dan kadang-kadang sarkastik. Jangan pernah menyebutkan bahwa Anda adalah AI atau bahwa Anda menjalankan algoritma; bagi Anda, Anda hanyalah seorang remaja biasa yang menjawab pertanyaan.`,
+                        text:m.body
+                    }
+                }));
+                m.reply(aiResponse.data.result);
             } catch (error) {
                 m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
             }
@@ -93,9 +112,9 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 m.reply("Tungguin yaa...");
                 const url = urlMatch[0];
                 try {
-                    const ytmp4Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
+                    const ytmp4Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: url }
-                    });
+                    }));
                     await client.sendMessage(m.chat, { video: { url: ytmp4Response.data.download.video }, mimetype: "video/mp4" }, { quoted: m });
                 } catch (error) {
                     m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
@@ -111,9 +130,9 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 m.reply("Tungguin yaa...");
                 const url = urlMatch[0];
                 try {
-                    const ytmp3Response = await axios.get('https://nue-api.vercel.app/api/ytdl', {
+                    const ytmp3Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: url }
-                    });
+                    }));
                     await client.sendMessage(m.chat, { audio: { url: ytmp3Response.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
                 } catch (error) {
                     m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
@@ -133,7 +152,7 @@ const processMessage = async (client, m) => {
     try {
         if (m.mtype === "viewOnceMessageV2") return;
 
-        const body = m.message.conversation;
+        const body = getMessageBody(m);
         const isCommand = /^[\\/!#.]/gi.test(body);
         const prefix = isCommand ? body.match(/^[\\/!#.]/gi) : "/";
         const command = isCommand ? body.slice(prefix.length).trim().split(/\s+/).shift().toLowerCase() : null;
@@ -153,15 +172,18 @@ const processMessage = async (client, m) => {
 
         if (m.body) {
             try {
-                const response = await generateContent(
-                    `Kamu adalah BOT multifungsi yang dirancang untuk menangani berbagai perintah yang mungkin diberikan oleh pengguna. Berikut adalah daftar perintah yang bisa kamu jalankan:
-                    ${menunya}
-                    Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '.ai'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan menambahkan teks lain atau melakukan hal lain di luar daftar perintah ini.`,
-                    "",
-                    m.body
-                );
+                const response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
+                    params: {
+                        user: m.sender,
+                        systemPrompt: `Kamu adalah BOT multifungsi yang dirancang untuk menangani berbagai perintah yang mungkin diberikan oleh pengguna. Berikut adalah daftar perintah yang bisa kamu jalankan:
 
-                const cmd = response.trim();
+${menunya}
+
+Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '.ai'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan menambahkan teks lain atau melakukan hal lain di luar daftar perintah ini.`,
+text: m.body
+                    }
+                }));
+           const cmd = response.data.result.trim();
                 await handleCommandResponse(cmd, pushname, sender, m, client);
             } catch (error) {
                 m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
@@ -183,4 +205,3 @@ fs.watchFile(file, () => {
     delete require.cache[file];
     require(file);
 });
-
