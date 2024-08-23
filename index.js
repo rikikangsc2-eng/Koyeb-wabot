@@ -1,6 +1,6 @@
 const sessionName = "rickyCreds";
 const {
-  default: rickyConnect,
+  default: makeWASocket,
   useMultiFileAuthState,
   DisconnectReason,
   fetchLatestBaileysVersion,
@@ -9,7 +9,6 @@ const {
   proto,
   getContentType,
   Browsers,
-  fetchLatestWaWebVersion
 } = require("@whiskeysockets/baileys");
 const pino = require("pino");
 const { Boom } = require("@hapi/boom");
@@ -17,22 +16,24 @@ const fs = require("fs");
 const axios = require("axios");
 const chalk = require("chalk");
 const figlet = require("figlet");
-const _ = require("lodash");
-const PhoneNumber = require("awesome-phonenumber");
 const readline = require("readline");
+const PhoneNumber = require("awesome-phonenumber");
+const _ = require("lodash");
+
 const usePairingCode = true;
+const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) });
+
+
 
 const question = (text) => {
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
   return new Promise((resolve) => {
     rl.question(text, resolve);
   });
 };
-
-const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) });
 
 const color = (text, color) => {
   return !color ? chalk.green(text) : chalk.keyword(color)(text);
@@ -40,7 +41,8 @@ const color = (text, color) => {
 
 async function startSession() {
   const { state, saveCreds } = await useMultiFileAuthState(`./${sessionName ? sessionName : "session"}`);
-  const { version, isLatest } = await fetchLatestWaWebVersion().catch(() => fetchLatestBaileysVersion());
+  const { version, isLatest } = await fetchLatestBaileysVersion();
+
   console.log(`using WA v${version.join(".")}, isLatest: ${isLatest}`);
   console.log(color(figlet.textSync("Alicia AI", {
     font: "Standard",
@@ -48,16 +50,17 @@ async function startSession() {
     vertivalLayout: "default",
     whitespaceBreak: false,
   }), "white"));
-  
+
   const connectionOptions = {
-version,
-keepAliveIntervalMs: 30000,
-printQRInTerminal: !usePairingCode,
-logger: pino({ level: "fatal" }),
-auth: state,
-browser: [ "Ubuntu", "Chrome", "20.0.04" ],
-}
-const client = rickyConnect(connectionOptions)
+    version,
+    keepAliveIntervalMs: 30000,
+    printQRInTerminal: !usePairingCode,
+    logger: pino({ level: "fatal" }),
+    auth: state,
+    browser: [ "Ubuntu", "Chrome", "20.0.04" ],
+  };
+
+  const client = makeWASocket(connectionOptions);
 
   if (usePairingCode && !client.authState.creds.registered) {
     const phoneNumber = await question('Masukan Nomer Yang Aktif Tanpa + , - Dan spasi:\n');
@@ -68,20 +71,20 @@ const client = rickyConnect(connectionOptions)
   store.bind(client.ev);
 
   client.ev.on("messages.upsert", async (chatUpdate) => {
-  try {
-      mek = chatUpdate.messages[0];
+    try {
+      let mek = chatUpdate.messages[0];
       if (!mek.message) return;
       mek.message = Object.keys(mek.message)[0] === "ephemeralMessage" ? mek.message.ephemeralMessage.message : mek.message;
       if (mek.key && mek.key.remoteJid === "status@broadcast") return;
       if (!client.public && !mek.key.fromMe && chatUpdate.type === "notify") return;
-      m = smsg(client, mek, store);
+      const m = smsg(client, mek, store);
       await client.readMessages([m.key]);
-      if (!client.public && !m.key.fromMe && chatUpdate.type === 'notify') return
-    if (m.sender.includes('6283873321433')) return;
-      if (m.key.id.startsWith('BAE5') && m.key.id.length === 16) return
+      if (!client.public && !m.key.fromMe && chatUpdate.type === 'notify') return;
+      if (m.sender.includes('6283873321433')) return;
+      if (m.key.id.startsWith('BAE5') && m.key.id.length === 16) return;
       require("./RickyPurPur.js")(client, m, chatUpdate, store);
     } catch (err) {
-    	console.error(err)
+      console.error(err);
     }
   });
 
@@ -150,34 +153,34 @@ const client = rickyConnect(connectionOptions)
     }
   };
 
-client.kalkulator = (input) => {
-   input = input.replace(/×/g, '*').replace(/÷/g, '/').replace(/:/g, '/');
-   input = input.replace(/\./g, '').replace(/,/g, '.');
+  client.kalkulator = (input) => {
+    input = input.replace(/×/g, '*').replace(/÷/g, '/').replace(/:/g, '/');
+    input = input.replace(/\./g, '').replace(/,/g, '.');
 
-  var regex = /(-?\d+(\.\d+)?(\s*[+\-*\/]\s*-?\d+(\.\d+)?)*)/g;
-  var matches = input.match(regex);
-   
- if (!matches) {
-    return false;
-  }
+    const regex = /(-?\d+(\.\d+)?(\s*[+\-*\/]\s*-?\d+(\.\d+)?)*)/g;
+    const matches = input.match(regex);
 
-  if (matches.length > 1) {
-    return matches.map(function(match) {
-      try {
-        return `${eval(match)}`;
-      } catch (error) {
-        return false;
-      }
-    });
-  }
-  
-  try {
-    var match = matches[0];
-    return `${eval(match)}`;
-  } catch (error) {
-    return false;
-  }
-}
+    if (!matches) {
+      return false;
+    }
+
+    if (matches.length > 1) {
+      return matches.map(function(match) {
+        try {
+          return `${eval(match)}`;
+        } catch (error) {
+          return false;
+        }
+      });
+    }
+
+    try {
+      const match = matches[0];
+      return `${eval(match)}`;
+    } catch (error) {
+      return false;
+    }
+  };
 
   client.decodeJid = (jid) => {
     if (!jid) return jid;
@@ -186,31 +189,27 @@ client.kalkulator = (input) => {
       return (decode.user && decode.server && decode.user + "@" + decode.server) || jid;
     } else return jid;
   };
-  
+
   client.public = true;
-  
-  client.getName = (jid, withoutContact = false) => {
+
+  client.getName = async (jid, withoutContact = false) => {
     id = client.decodeJid(jid);
     withoutContact = client.withoutContact || withoutContact;
     let v;
-    if (id.endsWith("@g.us"))
-      return new Promise(async (resolve) => {
-        v = store.contacts[id] || {};
-        if (!(v.name || v.subject)) v = client.groupMetadata(id) || {};
-        resolve(v.name || v.subject || PhoneNumber("+" + id.replace("@s.whatsapp.net", "")).getNumber("international"));
-      });
-    else
-      v =
-        id === "0@s.whatsapp.net"
-          ? {
-              id,
-              name: "WhatsApp",
-            }
-          : id === client.decodeJid(client.user.id)
-          ? client.user
-          : store.contacts[id] || {};
-    return (withoutContact ? "" : v.name) || v.subject || v.verifiedName || PhoneNumber("+" + jid.replace("@s.whatsapp.net", "")).getNumber("international");
+    if (id.endsWith("@g.us")) {
+      v = store.contacts[id] || {};
+      if (!(v.name || v.subject)) v = await client.groupMetadata(id);
+      return v.name || v.subject || PhoneNumber("+" + id.replace("@s.whatsapp.net", "")).getNumber("international");
+    } else {
+      v = id === "0@s.whatsapp.net"
+        ? { id, name: "WhatsApp" }
+        : id === client.decodeJid(client.user.id)
+        ? client.user
+        : store.contacts[id] || {};
+      return (withoutContact ? "" : v.name) || v.subject || v.verifiedName || PhoneNumber("+" + jid.replace("@s.whatsapp.net", "")).getNumber("international");
+    }
   };
+
   client.sendImage = async (jid, path, caption = "", quoted = "", options) => {
     let buffer = Buffer.isBuffer(path)
       ? path
