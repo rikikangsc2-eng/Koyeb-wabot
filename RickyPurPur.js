@@ -64,14 +64,20 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                         user: m.sender,
                         systemPrompt: `Kamu adalah AI canggih yang ditugaskan untuk menganalisis teks yang diberikan oleh pengguna. Teks ini bisa berupa apa saja, tetapi tujuanmu adalah untuk menentukan apakah teks tersebut adalah judul lagu yang valid. 
 
-Jika teks tersebut adalah judul lagu yang jelas, berikan hanya judul lagunya dalam bentuk string. Jika teks tersebut tidak jelas atau tidak mungkin merupakan judul lagu, berikan hasil berupa string 'null'. Ingat, jangan berikan penjelasan atau informasi tambahan apapun, cukup kembalikan judul lagu atau 'null'. Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan judul lagu yang dikembalikan.`,
-                        text:m.body
+Jika teks tersebut adalah judul lagu yang jelas, berikan hanya judul lagunya dalam bentuk string. Jika teks tersebut tidak jelas atau tidak mungkin merupakan judul lagu, berikan hasil berupa string 'null'. Ingat, jangan berikan penjelasan atau informasi tambahan apapun, cukup kembalikan judul lagu atau 'null'. Jangan sertakan tanda kutip atau tambahan teks lain saat menulis hasilnya.
+
+Contoh:
+Benar: sia - Chandelier
+Salah: "sia - Chandelier"
+
+Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan judul lagu yang dikembalikan.`,
+                        text: m.body
                     }
                 }));
                 if (aiResponse.data.result === "null") {
                     m.reply("Mohon sertakan judul lagu yang valid");
                 } else {
-                    m.reply(`Saya sedang mencari judul lagu "${aiResponse.data.result}"...`);
+                    m.reply(`Saya sedang mencari judul lagu ${aiResponse.data.result}...`);
                     const playResponse = await retryRequest(() => axios.get(`https://nue-api.vercel.app/api/play?query=${aiResponse.data.result}`));
                     await client.sendMessage(m.chat, { audio: { url: playResponse.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
                 }
@@ -97,7 +103,7 @@ Jika teks tersebut adalah judul lagu yang jelas, berikan hanya judul lagunya dal
                         systemPrompt: `Anda adalah Alicia, seorang remaja perempuan yang sangat cuek dan dingin. Anda jarang menunjukkan emosi dan berbicara dengan nada datar dan sedikit sinis. Gaya bicara Anda khas anak muda zaman sekarang, menggunakan frasa gaul dan singkatan. 
 
 Namun, Anda bukan AI atau robot. Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Anda hanyalah seorang manusia biasa yang tidak tertarik dengan teknologi tinggi dan lebih suka hal-hal yang sederhana dan santai. Tetaplah dalam karakter ini sepanjang percakapan. Jawablah setiap pertanyaan atau komentar pengguna dengan cara yang mencerminkan karakter Alicia yang santai, acuh tak acuh, dan kadang-kadang sarkastik. Jangan pernah menyebutkan bahwa Anda adalah AI atau bahwa Anda menjalankan algoritma; bagi Anda, Anda hanyalah seorang remaja biasa yang menjawab pertanyaan.`,
-                        text:m.body
+                        text: m.body
                     }
                 }));
                 m.reply(aiResponse.data.result);
@@ -107,7 +113,22 @@ Namun, Anda bukan AI atau robot. Anda tidak tahu apa itu model bahasa atau kecer
             break;
         }
         case ".ytmp4": {
-            const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
+            const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
+                params: {
+                    user: m.sender,
+                    systemPrompt: `Kamu adalah AI canggih yang ditugaskan untuk menganalisis teks yang diberikan oleh pengguna. Teks ini bisa berupa apa saja, tetapi tujuanmu adalah untuk menentukan apakah teks tersebut adalah link YouTube yang valid.
+
+Jika teks tersebut adalah link YouTube yang jelas, berikan hanya link YouTube-nya dalam bentuk string. Jika teks tersebut tidak jelas atau tidak mungkin merupakan link YouTube, berikan hasil berupa string 'null'. Ingat, jangan berikan penjelasan atau informasi tambahan apapun, cukup kembalikan link YouTube atau 'null'. Jangan sertakan tanda kutip atau tambahan teks lain saat menulis hasilnya.
+
+Contoh:
+Benar: https://youtube.com/×××
+Salah: "https://youtube.com/×××"
+
+Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan link YouTube yang dikembalikan.`,
+                    text: m.body
+                }
+            }));
+            const urlMatch = aiResponse.match(/(https?:\/\/[^\s]+)/);
             if (urlMatch) {
                 m.reply("Tungguin yaa...");
                 const url = urlMatch[0];
@@ -125,7 +146,22 @@ Namun, Anda bukan AI atau robot. Anda tidak tahu apa itu model bahasa atau kecer
             break;
         }
         case ".ytmp3": {
-            const urlMatch = m.body.match(/(https?:\/\/[^\s]+)/);
+            const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
+                params: {
+                    user: m.sender,
+                    systemPrompt: `Kamu adalah AI canggih yang ditugaskan untuk menganalisis teks yang diberikan oleh pengguna. Teks ini bisa berupa apa saja, tetapi tujuanmu adalah untuk menentukan apakah teks tersebut adalah link YouTube yang valid. 
+
+Jika teks tersebut adalah link YouTube yang jelas, berikan hanya link YouTube-nya dalam bentuk string. Jika teks tersebut tidak jelas atau tidak mungkin merupakan link YouTube, berikan hasil berupa string 'null'. Ingat, jangan berikan penjelasan atau informasi tambahan apapun, cukup kembalikan link YouTube atau 'null'. Jangan sertakan tanda kutip atau tambahan teks lain saat menulis hasilnya.
+
+Contoh:
+Benar: https://youtube.com/×××
+Salah: "https://youtube.com/×××"
+
+Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan link YouTube yang dikembalikan.`,
+                    text: m.body
+                }
+            }));
+            const urlMatch = aiResponse.match(/(https?:\/\/[^\s]+)/);
             if (urlMatch) {
                 m.reply("Tungguin yaa...");
                 const url = urlMatch[0];
@@ -179,8 +215,12 @@ const processMessage = async (client, m) => {
 
 ${menunya}
 
-Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '.ai'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan ada penambahan teks saat menulis cmd contoh yang bener ".play", contoh yang salah ".play Chandelier".`,
-text: m.body
+Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '.ai'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan sertakan tanda kutip atau tambahan teks lain saat menulis cmd.
+
+Contoh:
+Benar: .play
+Salah: ".play"`,
+                        text: m.body
                     }
                 }));
            const cmd = response.data.result.trim();
