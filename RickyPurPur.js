@@ -69,6 +69,7 @@ Jika teks tersebut adalah judul lagu yang jelas, berikan hanya judul lagunya dal
 Contoh:
 Benar: sia - Chandelier
 Salah: "sia - Chandelier"
+salah: .play sia - Chandelier
 
 Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan judul lagu yang dikembalikan.`,
                         text: m.body
@@ -123,6 +124,7 @@ Jika teks tersebut adalah link YouTube yang jelas, berikan hanya link YouTube-ny
 Contoh:
 Benar: https://youtube.com/×××
 Salah: "https://youtube.com/×××"
+salah: .ytmp4 https://youtube.com/×××
 
 Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan link YouTube yang dikembalikan.`,
                     text: m.body
@@ -156,6 +158,7 @@ Jika teks tersebut adalah link YouTube yang jelas, berikan hanya link YouTube-ny
 Contoh:
 Benar: https://youtube.com/×××
 Salah: "https://youtube.com/×××"
+salah: .ytmp3 https://youtube.com/×××
 
 Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan link YouTube yang dikembalikan.`,
                     text: m.body
@@ -219,12 +222,14 @@ Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, d
 
 Contoh:
 Benar: .play
-Salah: ".play"`,
+Salah: ".play"
+Salah: ".play blabla"`,
                         text: m.body
                     }
                 }));
            const cmd = response.data.result.trim();
                 if (m.isGroup && command === "ai") {
+                    m.body = m.body.toLowerCase().split(".ai").slice(1).join("");
                    await handleCommandResponse(cmd, pushname, sender, m, client);
                 } else {
                     await handleCommandResponse(cmd, pushname, sender, m, client);
