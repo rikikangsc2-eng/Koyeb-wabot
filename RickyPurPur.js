@@ -184,6 +184,9 @@ const processMessage = async (client, m) => {
         const groupMetadata = m.isGroup ? await client.groupMetadata(from).catch(() => undefined) : undefined;
         const groupName = groupMetadata ? groupMetadata.subject : '';
 
+        if (m.isGroup){
+            if (command !== "ai") return 
+        }
         if (m.body && !m.isGroup) {
             console.log(chalk.black(chalk.bgWhite("[ LOGS ]")), chalk.cyan(body.slice(0, 30)), chalk.magenta("From"), chalk.green(pushname), chalk.yellow(`[ ${sender.replace("@s.whatsapp.net", "")} ]`));
         } else if (m.body && m.isGroup) {
