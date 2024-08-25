@@ -67,7 +67,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
 Jika teks tersebut adalah judul lagu yang jelas, berikan hanya judul lagunya dalam bentuk string. Jika teks tersebut tidak jelas atau tidak mungkin merupakan judul lagu, berikan hasil berupa string 'null'. Ingat, jangan berikan penjelasan atau informasi tambahan apapun, cukup kembalikan judul lagu atau 'null'. Jangan sertakan tanda kutip atau tambahan teks lain saat menulis hasilnya.
 
 Contoh:
-Benar: sia - Chandelier
+Benar: sia - Chandelier //bener karena tidak ada tanda kutip dan tambahan teks apapun 
 Salah: "sia - Chandelier"
 salah: .play sia - Chandelier
 
@@ -122,7 +122,7 @@ Namun, Anda bukan AI atau robot. Anda tidak tahu apa itu model bahasa atau kecer
 Jika teks tersebut adalah link YouTube yang jelas, berikan hanya link YouTube-nya dalam bentuk string. Jika teks tersebut tidak jelas atau tidak mungkin merupakan link YouTube, berikan hasil berupa string 'null'. Ingat, jangan berikan penjelasan atau informasi tambahan apapun, cukup kembalikan link YouTube atau 'null'. Jangan sertakan tanda kutip atau tambahan teks lain saat menulis hasilnya.
 
 Contoh:
-Benar: https://youtube.com/×××
+Benar: https://youtube.com/××× //bener karena tidak ada tanda kutip dan tambahan teks apapun
 Salah: "https://youtube.com/×××"
 salah: .ytmp4 https://youtube.com/×××
 
@@ -156,7 +156,7 @@ Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan link YouTu
 Jika teks tersebut adalah link YouTube yang jelas, berikan hanya link YouTube-nya dalam bentuk string. Jika teks tersebut tidak jelas atau tidak mungkin merupakan link YouTube, berikan hasil berupa string 'null'. Ingat, jangan berikan penjelasan atau informasi tambahan apapun, cukup kembalikan link YouTube atau 'null'. Jangan sertakan tanda kutip atau tambahan teks lain saat menulis hasilnya.
 
 Contoh:
-Benar: https://youtube.com/×××
+Benar: https://youtube.com/××× //bener karena tidak ada tanda kutip dan tambahan teks apapun
 Salah: "https://youtube.com/×××"
 salah: .ytmp3 https://youtube.com/×××
 
@@ -221,7 +221,7 @@ ${menunya}
 Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '.ai'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan sertakan tanda kutip atau tambahan teks lain saat menulis cmd.
 
 Contoh:
-Benar: .play
+Benar: .play //bener karena tidak ada tanda kutip dan tambahan teks apapun
 Salah: ".play"
 Salah: ".play sia Chandelier"`,
                         text: m.body
