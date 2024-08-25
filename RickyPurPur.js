@@ -62,20 +62,19 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: `Kamu adalah AI canggih yang bertugas untuk memastikan apakah teks yang diberikan pengguna adalah judul lagu yang valid. Jika teks tersebut adalah judul lagu yang jelas dan valid, kembalikan hanya judul lagunya sebagai string tanpa tanda kutip atau teks tambahan apa pun. Jika teks tersebut tidak jelas atau tidak mungkin merupakan judul lagu, kembalikan string 'null'.
-
-Ingat, jangan memberikan penjelasan atau informasi tambahan apa pun. Tugasmu adalah memastikan bahwa output hanya berisi judul lagu atau 'null'.
-
-Contoh:
-- Input valid: sia - Chandelier //Output: sia - Chandelier
-- Input tidak valid: /play sia - Chandelier //Output: null`,
+                        systemPrompt: `Kamu adalah AI bertugas untuk memberikan judul lagu ke system dari teks pengguna, jika teks pengguna tidak menyertakan judul lagu yang valid maka kembalikan nilai "false", namun jika teks pengguna ada yang menyertakan judul lagu maka ambil judul lagunya dan simpan dalam format json ini: \`{
+status: true/false
+judul: null/title
+}\`
+note: Berikan format JSON-NYA tanpa tambahan teks apapun karna nanti akan di urai oleh system`,
                         text: query
                     }
                 }));
-                if (aiResponse.data.result === "null") {
+        const { status, judul } = JSON.parse(aiResponse.data.result);
+                if (!status) {
                     m.reply("Mohon sertakan judul lagu yang valid.");
                 } else {
-                    m.reply(`Saya sedang mencari lagu berjudul ${aiResponse.data.result}...`);
+                    m.reply(`Saya sedang mencari lagu berjudul ${judul}...`);
                     const playResponse = await retryRequest(() => axios.get(`https://nue-api.vercel.app/api/play?query=${aiResponse.data.result}`));
                     await client.sendMessage(m.chat, { audio: { url: playResponse.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
                 }
@@ -115,18 +114,17 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: `Kamu adalah AI yang ditugaskan untuk menganalisis teks dan menentukan apakah itu adalah link YouTube yang valid. Jika teks tersebut adalah link YouTube yang jelas dan valid, kembalikan hanya link tersebut sebagai string tanpa tanda kutip atau teks tambahan apa pun. Jika teks tersebut tidak jelas atau tidak mungkin merupakan link YouTube, kembalikan string 'null'.
-
-Ingat, jangan memberikan penjelasan atau informasi tambahan apa pun. Tugasmu adalah memastikan bahwa output hanya berisi link YouTube atau 'null'.
-
-Contoh:
-- Input valid: https://youtube.com/xxxx //Output: https://youtube.com/xxxx
-- Input tidak valid: /ytmp4 https://youtube.com/xxxx //Output: null`,
+                        systemPrompt: `Kamu adalah AI pendeteksi link YouTube, jika ada link YouTube yang tercantum selama berinteraksi dengan pengguna maka ambil link YouTube tersebut untuk di serahkan ke system, dan kembalikan respon seperti ini:\`{
+status: true/false
+link: null/link
+}\`
+note: Berikan format JSON-NYA tanpa tambahan teks apapun karna nanti akan di urai oleh system`,
                         text: m.body
                     }
                 }));
-                const url = aiResponse.data.result.trim();
-                if (url !== "null") {
+                const { status, link } = JSON.parse(aiResponse.data.result);
+                const url = link
+                if (status) {
                     m.reply("Tunggu sebentar...");
                     const ytmp4Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: url }
@@ -145,18 +143,17 @@ Contoh:
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: `Kamu adalah AI yang ditugaskan untuk menganalisis teks dan menentukan apakah itu adalah link YouTube yang valid. Jika teks tersebut adalah link YouTube yang jelas dan valid, kembalikan hanya link tersebut sebagai string tanpa tanda kutip atau teks tambahan apa pun. Jika teks tersebut tidak jelas atau tidak mungkin merupakan link YouTube, kembalikan string 'null'.
-
-Ingat, jangan memberikan penjelasan atau informasi tambahan apa pun. Tugasmu adalah memastikan bahwa output hanya berisi link YouTube atau 'null'.
-
-Contoh:
-- Input valid: https://youtube.com/xxxx //Output: https://youtube.com/xxxx
-- Input tidak valid: /ytmp3 https://youtube.com/xxxx //Output: null`,
+                        systemPrompt: `Kamu adalah AI pendeteksi link YouTube, jika ada link YouTube yang tercantum selama berinteraksi dengan pengguna maka ambil link YouTube tersebut untuk di serahkan ke system, dan kembalikan respon seperti ini:\`{
+status: true/false
+link: null/link
+}\`
+note: Berikan format JSON-NYA tanpa tambahan teks apapun karna nanti akan di urai oleh system`,
                         text: m.body
                     }
                 }));
-                const url = aiResponse.data.result.trim();
-                if (url !== "null") {
+                const { status, link } = JSON.parse(aiResponse.data.result);
+                const url = link
+                if (status) {
                     m.reply("Tunggu sebentar...");
                     const ytmp3Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: url }
@@ -174,7 +171,7 @@ Contoh:
             await axios.get('https://nue-api.vercel.app/api/lgpt',{params: {
     user: m.sender,
     systemPrompt: 'Yang berinteraksi bersama anda saat ini adalah system anda hanya perlu menjawab "siap" tanpa tambahan apapun',
-    text: `printah dari anda tidak valid pastikan anda memenuhi instruksi, Pemberitahuan ini muncul karna anda mengirimkan perintah "${cmd}", ini mungkin terjadi karna anda tidak mengikuti instruksi format yang benar, Jangan mengulangi kesalahan yang sama`
+    text: `JSON dari anda tidak valid Harap berikan JSON nya saja karna nanti bakal otomatis di urai oleh system`
             }})
             m.reply(`Ai belum mengerti dan AI sudah mendapatkan penjelasan dari sistem, *ulangi permintaan*`);
             break;
@@ -213,14 +210,14 @@ const processMessage = async (client, m) => {
 ${menunya}
 
 Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '/ai'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan sertakan tanda kutip atau teks tambahan apa pun pada output perintah.
-
-Contoh:
-- Input valid: /play //Output: .play
-- Input tidak valid: "/play" //Output: null`,
+Kembalikan respon seperti ini:\`{
+cmd: perintah-nya (ex:/ai)
+}\`
+note: Berikan format JSON-NYA tanpa tambahan teks apapun karna nanti akan di urai oleh system`,
                         text: m.body
                     }
                 }));
-                const cmd = response.data.result.trim();
+                const { cmd } = JSON.parse(response.data.result);
                 if (m.isGroup) {
                     if (command === 'ai') {
                         m.body = m.body.toLowerCase().split(".ai").slice(1).join("").trim();
