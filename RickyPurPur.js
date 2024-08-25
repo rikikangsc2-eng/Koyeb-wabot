@@ -128,7 +128,7 @@ Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan link YouTu
                     text: m.body
                 }
             }));
-            const urlMatch = aiResponse.match(/(https?:\/\/[^\s]+)/);
+            const urlMatch = aiResponse.data.result.match(/(https?:\/\/[^\s]+)/);
             if (urlMatch) {
                 m.reply("Tungguin yaa...");
                 const url = urlMatch[0];
@@ -161,7 +161,7 @@ Tugasmu adalah memastikan bahwa hanya teks yang benar-benar merupakan link YouTu
                     text: m.body
                 }
             }));
-            const urlMatch = aiResponse.match(/(https?:\/\/[^\s]+)/);
+            const urlMatch = aiResponse.data.result.match(/(https?:\/\/[^\s]+)/);
             if (urlMatch) {
                 m.reply("Tungguin yaa...");
                 const url = urlMatch[0];
@@ -224,7 +224,11 @@ Salah: ".play"`,
                     }
                 }));
            const cmd = response.data.result.trim();
-                await handleCommandResponse(cmd, pushname, sender, m, client);
+                if (m.isGroup && command === "ai") {
+                   await handleCommandResponse(cmd, pushname, sender, m, client);
+                } else {
+                    await handleCommandResponse(cmd, pushname, sender, m, client);
+                }
             } catch (error) {
                 m.reply("*Koneksi terputus silahkan coba lagi beberapa menit*");
             }
