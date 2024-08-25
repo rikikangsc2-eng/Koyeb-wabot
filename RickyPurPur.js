@@ -62,15 +62,15 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: `Kamu adalah AI bertugas untuk memberikan judul lagu ke system dari teks pengguna, jika teks pengguna tidak menyertakan judul lagu yang valid maka kembalikan nilai "false", namun jika teks pengguna ada yang menyertakan judul lagu maka ambil judul lagunya dan simpan dalam format json ini: \`{
-"status": true/false
+                        systemPrompt: `Kamu adalah AI bertugas untuk memberikan judul lagu ke sistem dari teks pengguna, jika teks pengguna tidak menyertakan judul lagu yang valid maka kembalikan nilai "false", namun jika teks pengguna ada yang menyertakan judul lagu maka ambil judul lagunya dan simpan dalam format json ini: \`{
+"status": true/false,
 "judul": "null/title"
 }\`
-note: Berikan format JSON-NYA tanpa tambahan teks apapun karna nanti akan di urai oleh system`,
+note: Berikan format JSON-nya tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
                         text: query
                     }
                 }));
-        const { status, judul } = JSON.parse(aiResponse.data.result);
+                const { status, judul } = JSON.parse(aiResponse.data.result);
                 if (!status) {
                     m.reply("Mohon sertakan judul lagu yang valid.");
                 } else {
@@ -114,20 +114,19 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: `Kamu adalah AI pendeteksi link YouTube, jika ada link YouTube yang tercantum selama berinteraksi dengan pengguna maka ambil link YouTube tersebut untuk di serahkan ke system, dan kembalikan respon seperti ini:\`{
-"status": true/false
-"link": null/link
+                        systemPrompt: `Kamu adalah AI pendeteksi link YouTube, jika ada link YouTube yang tercantum selama berinteraksi dengan pengguna maka ambil link YouTube tersebut untuk diserahkan ke sistem, dan kembalikan respon seperti ini:\`{
+"status": true/false,
+"link": "null/link"
 }\`
-note: Berikan format JSON-NYA tanpa tambahan teks apapun karna nanti akan di urai oleh system`,
+note: Berikan format JSON-nya tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
                         text: m.body
                     }
                 }));
                 const { status, link } = JSON.parse(aiResponse.data.result);
-                const url = link
                 if (status) {
                     m.reply("Tunggu sebentar...");
                     const ytmp4Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
-                        params: { url: url }
+                        params: { url: link }
                     }));
                     await client.sendMessage(m.chat, { video: { url: ytmp4Response.data.download.video }, mimetype: "video/mp4" }, { quoted: m });
                 } else {
@@ -143,20 +142,19 @@ note: Berikan format JSON-NYA tanpa tambahan teks apapun karna nanti akan di ura
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: `Kamu adalah AI pendeteksi link YouTube, jika ada link YouTube yang tercantum selama berinteraksi dengan pengguna maka ambil link YouTube tersebut untuk di serahkan ke system, dan kembalikan respon seperti ini:\`{
-"status": true/false
+                        systemPrompt: `Kamu adalah AI pendeteksi link YouTube, jika ada link YouTube yang tercantum selama berinteraksi dengan pengguna maka ambil link YouTube tersebut untuk diserahkan ke sistem, dan kembalikan respon seperti ini:\`{
+"status": true/false,
 "link": "null/link"
 }\`
-note: Berikan format JSON-NYA tanpa tambahan teks apapun karna nanti akan di urai oleh system`,
+note: Berikan format JSON-nya tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
                         text: m.body
                     }
                 }));
                 const { status, link } = JSON.parse(aiResponse.data.result);
-                const url = link
                 if (status) {
                     m.reply("Tunggu sebentar...");
                     const ytmp3Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
-                        params: { url: url }
+                        params: { url: link }
                     }));
                     await client.sendMessage(m.chat, { audio: { url: ytmp3Response.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
                 } else {
@@ -196,7 +194,7 @@ const processMessage = async (client, m) => {
             try {
                 const response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender,
+                        user: Date.now(),
                         systemPrompt: `Kamu adalah BOT multifungsi yang dirancang untuk menangani berbagai perintah yang mungkin diberikan oleh pengguna. Berikut adalah daftar perintah yang bisa kamu jalankan:
 
 ${menunya}
@@ -204,7 +202,7 @@ ${menunya}
 Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '/ai'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Kembalikan respon dalam format JSON seperti ini:\`{
 "cmd": "perintah-nya" (ex:/ai)
 }\`
-note: Berikan format JSON-NYA tanpa tambahan teks apapun karna nanti akan di urai oleh system`,
+note: Berikan format JSON-nya tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
                         text: m.body
                     }
                 }));
@@ -219,20 +217,13 @@ note: Berikan format JSON-NYA tanpa tambahan teks apapun karna nanti akan di ura
                     await handleCommandResponse(cmd, pushname, sender, m, client);
                 }
             } catch (error) {
-                await axios.get('https://nue-api.vercel.app/api/lgpt',{params: {
-                    user: m.sender,
-                    systemPrompt: 'Yang berinteraksi bersama anda saat ini adalah system anda hanya perlu menjawab "siap" tanpa tambahan apapun',
-                    text: `JSON dari anda tidak valid Harap berikan JSON nya saja dan pastikan valid karna nanti bakal otomatis di urai oleh system dengan JSON.parse()`
-                            }})
-                            m.reply(`Ai belum mengerti dan AI sudah mendapatkan penjelasan dari sistem, *Silahkan coba lagi..*`);
-        
+                m.reply(`mohon maaf ada sedikit kendala, silahkan coba lagi dalam beberapa menit`);
             }
         }
     } catch (err) {
         m.reply(util.format(err));
     }
 };
-
 
 module.exports = sansekai = async (client, m, chatUpdate) => {
     await processMessage(client, m);
@@ -245,3 +236,4 @@ fs.watchFile(file, () => {
     delete require.cache[file];
     require(file);
 });
+
