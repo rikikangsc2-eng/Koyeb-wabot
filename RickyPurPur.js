@@ -7,12 +7,12 @@ const axios = require("axios");
 const BOT_OWNER = '6283894391287';
 const NO_BOT = '6283873321433';
 const BOT_GROUP = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
-const menunya = `1. ".ai" - Untuk mengobrol atau bertanya dengan AI.
-2. ".ytmp3" - Untuk mengunduh audio dari link YouTube yang diberikan.
-3. ".ytmp4" - Untuk mengunduh video dari link YouTube yang diberikan.
-4. ".menu" - Untuk menampilkan menu fitur yang tersedia.
-5. ".play" - Untuk memutar musik berdasarkan judul yang diberikan oleh pengguna.
-6. ".owner" - Untuk menampilkan informasi tentang owner bot.`;
+const menunya = `1. "/ai" - Untuk mengobrol atau bertanya dengan AI.
+2. "/ytmp3" - Untuk mengunduh audio dari link YouTube yang diberikan.
+3. "/ytmp4" - Untuk mengunduh video dari link YouTube yang diberikan.
+4. "/menu" - Untuk menampilkan menu fitur yang tersedia.
+5. "/play" - Untuk memutar musik berdasarkan judul yang diberikan oleh pengguna.
+6. "/owner" - Untuk menampilkan informasi tentang owner bot.`;
 
 const getMessageBody = (m) => {
     switch (m.mtype) {
@@ -56,7 +56,7 @@ const retryRequest = async (requestFunction, retries = 3) => {
 
 const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
     switch (cmd) {
-        case ".play": {
+        case "/play": {
             try {
                 const query = m.body;
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
@@ -68,7 +68,7 @@ Ingat, jangan memberikan penjelasan atau informasi tambahan apa pun. Tugasmu ada
 
 Contoh:
 - Input valid: sia - Chandelier //Output: sia - Chandelier
-- Input tidak valid: .play sia - Chandelier //Output: null`,
+- Input tidak valid: /play sia - Chandelier //Output: null`,
                         text: query
                     }
                 }));
@@ -84,16 +84,16 @@ Contoh:
             }
             break;
         }
-        case ".owner": {
+        case "/owner": {
             m.reply(`Halo, saya Alicia! Saya dibuat dan diurus oleh ${BOT_OWNER}. Saya adalah AI canggih yang multifungsi dan serba guna.`);
             break;
         }
-        case ".menu": {
+        case "/menu": {
             const menuText = menunya.split("\n").map(item => item.split("-")[1].trim()).join(`\n- `);
             m.reply(`Halo! Saat ini Alicia bisa melakukan:\n- ${menuText}\n\n*©Alicia AI*`);
             break;
         }
-        case ".ai": {
+        case "/ai": {
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
@@ -110,7 +110,7 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
             }
             break;
         }
-        case ".ytmp4": {
+        case "/ytmp4": {
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
@@ -121,7 +121,7 @@ Ingat, jangan memberikan penjelasan atau informasi tambahan apa pun. Tugasmu ada
 
 Contoh:
 - Input valid: https://youtube.com/xxxx //Output: https://youtube.com/xxxx
-- Input tidak valid: .ytmp4 https://youtube.com/xxxx //Output: null`,
+- Input tidak valid: /ytmp4 https://youtube.com/xxxx //Output: null`,
                         text: m.body
                     }
                 }));
@@ -140,7 +140,7 @@ Contoh:
             }
             break;
         }
-        case ".ytmp3": {
+        case "/ytmp3": {
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
@@ -151,7 +151,7 @@ Ingat, jangan memberikan penjelasan atau informasi tambahan apa pun. Tugasmu ada
 
 Contoh:
 - Input valid: https://youtube.com/xxxx //Output: https://youtube.com/xxxx
-- Input tidak valid: .ytmp3 https://youtube.com/xxxx //Output: null`,
+- Input tidak valid: /ytmp3 https://youtube.com/xxxx //Output: null`,
                         text: m.body
                     }
                 }));
@@ -171,7 +171,12 @@ Contoh:
             break;
         }
         default:
-            m.reply(`Perintah tidak valid: ${cmd}`);
+            await axios.get('https://nue-api.vercel.app/api/lgpt',{params: {
+    user: m.sender,
+    systemPrompt: 'Yang berinteraksi bersama anda saat ini adalah system anda hanya perlu menjawab "siap" tanpa tambahan apapun',
+    text: `printah dari anda tidak valid pastikan anda memenuhi instruksi, Pemberitahuan ini muncul karna anda mengirimkan perintah "${cmd}", ini mungkin terjadi karna anda tidak mengikuti instruksi format yang benar, Jangan mengulangi kesalahan yang sama`
+            }})
+            m.reply(`Ai belum mengerti dan AI sudah mendapatkan penjelasan dari sistem, *ulangi permintaan*`);
             break;
     }
 };
@@ -207,11 +212,11 @@ const processMessage = async (client, m) => {
 
 ${menunya}
 
-Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '.ai'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan sertakan tanda kutip atau teks tambahan apa pun pada output perintah.
+Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '/ai'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Jangan sertakan tanda kutip atau teks tambahan apa pun pada output perintah.
 
 Contoh:
-- Input valid: .play //Output: .play
-- Input tidak valid: ".play" //Output: null`,
+- Input valid: /play //Output: .play
+- Input tidak valid: "/play" //Output: null`,
                         text: m.body
                     }
                 }));
