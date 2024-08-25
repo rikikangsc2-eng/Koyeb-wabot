@@ -223,14 +223,17 @@ Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, d
 Contoh:
 Benar: .play
 Salah: ".play"
-Salah: ".play blabla"`,
+Salah: ".play sia Chandelier"`,
                         text: m.body
                     }
                 }));
            const cmd = response.data.result.trim();
-                if (m.isGroup && command === "ai") {
-                    m.body = m.body.toLowerCase().split(".ai").slice(1).join("");
-                   await handleCommandResponse(cmd, pushname, sender, m, client);
+                if (m.isGroup) {
+                    if (command === 'ai') {
+                        m.body = m.body.toLowerCase().split(".ai").slice(1).join("").trim();
+                           await handleCommandResponse(cmd, pushname, sender, m, client);
+                    }
+                    return;
                 } else {
                     await handleCommandResponse(cmd, pushname, sender, m, client);
                 }
