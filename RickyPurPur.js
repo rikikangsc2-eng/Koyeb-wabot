@@ -61,13 +61,18 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 const query = m.body;
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender+cmd,
+                        user: m.sender+"ytplay",
                         systemPrompt: `Kamu adalah AI bertugas untuk memberikan judul lagu ke sistem dari teks pengguna, jika teks pengguna tidak menyertakan judul lagu yang valid maka kembalikan nilai "false", namun jika teks pengguna ada yang menyertakan judul lagu maka ambil judul lagunya dan simpan dalam format json ini: \`{
 "status": true/false,
 "judul": "null/title"
 }\`
 note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
-                        text: query
+                        text: query,
+                        aiMessage: `Example:
+{
+"status": true
+"judul": "sia - Chandelier"
+}`
                     }
                 }));
                 const { status, judul } = JSON.parse(aiResponse.data.result);
@@ -96,7 +101,7 @@ note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti aka
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender+cmd,
+                        user: m.sender+"alicia",
                         systemPrompt: `Anda adalah Alicia, seorang remaja perempuan yang sangat cuek dan dingin. Anda berbicara dengan nada datar, sedikit sinis, dan menggunakan frasa gaul serta singkatan khas anak muda zaman sekarang.
 
 Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Anda adalah seorang remaja biasa yang tidak tertarik dengan teknologi tinggi dan lebih suka hal-hal yang sederhana dan santai. Tetaplah dalam karakter ini sepanjang percakapan dan jawablah setiap pertanyaan atau komentar pengguna dengan cara yang mencerminkan karakter Alicia yang santai, acuh tak acuh, dan kadang-kadang sarkastik.`,
@@ -113,13 +118,18 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender+cmd,
+                        user: m.sender+"ytdl",
                         systemPrompt: `Kamu adalah AI pendeteksi link YouTube, jika ada link YouTube yang tercantum selama berinteraksi dengan pengguna maka ambil link YouTube tersebut untuk diserahkan ke sistem, dan kembalikan respon seperti ini:\`{
 "status": true/false,
 "link": "null/link"
 }\`
 note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
-                        text: m.body
+                        text: m.body,
+                        aiMessage: `Example:
+{
+"status": true,
+"link": "https://youtu.be/2vjPBrBU-TM?si=07UEKhK5_f3hFpwl"
+}`
                     }
                 }));
                 const { status, link } = JSON.parse(aiResponse.data.result);
@@ -141,13 +151,18 @@ note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti aka
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender+cmd,
+                        user: m.sender+"ytdl",
                         systemPrompt: `Kamu adalah AI pendeteksi link YouTube, jika ada link YouTube yang tercantum selama berinteraksi dengan pengguna maka ambil link YouTube tersebut untuk diserahkan ke sistem, dan kembalikan respon seperti ini:\`{
 "status": true/false,
 "link": "null/link"
 }\`
 note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
-                        text: m.body
+                        text: m.body,
+                        aiMessage: `Example:
+{
+"status":true
+"link": "https://youtu.be/2vjPBrBU-TM?si=07UEKhK5_f3hFpwl"
+}`
                     }
                 }));
                 const { status, link } = JSON.parse(aiResponse.data.result);
@@ -206,7 +221,11 @@ Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, d
 "cmd": "perintah-nya" (ex:/ai)
 }\`
 note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
-                        text: m.body
+                        text: m.body,
+                        aiMessage: `Example: 
+{
+"cmd": "/play"
+}`
                     }
                 }));
                 const { cmd } = JSON.parse(response.data.result);
@@ -220,7 +239,7 @@ note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti aka
                     await handleCommandResponse(cmd, pushname, sender, m, client);
                 }
             } catch (error) {
-                m.reply(`mohon maaf ada sedikit kendala, silahkan coba lagi dalam beberapa menit`);
+                m.reply(`> ${error.message}\nmohon maaf ada sedikit kendala, silahkan coba lagi dalam beberapa menit`);
             }
         }
     } catch (err) {
