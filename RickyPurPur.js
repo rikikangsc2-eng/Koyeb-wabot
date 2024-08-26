@@ -62,17 +62,14 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender+"ytplay",
-                        systemPrompt: `Kamu adalah AI bertugas untuk memberikan judul lagu ke sistem dari teks pengguna, jika teks pengguna tidak menyertakan judul lagu yang valid maka kembalikan nilai "false", namun jika teks pengguna ada yang menyertakan judul lagu maka ambil judul lagunya dan simpan dalam format json ini: \`{
-"status": true/false,
-"judul": "null/title"
-}\`
-note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
-                        text: query,
-                        aiMessage: `Example:
+                        systemPrompt: `Anda harus membuat JSON dari konteks percakapan pengguna`,
+                        text: `Buatkan json dari konteks percakapan berikut: \`${m.body}\``,
+                        aiMessage: `Contoh Respon anda:
 {
 "status": true
 "judul": "sia - Chandelier"
-}`
+}
+note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
                 const { status, judul } = JSON.parse(aiResponse.data.result);
@@ -116,22 +113,19 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
         }
         case "/ytmp4": {
             try {
-                const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
-                    params: {
-                        user: m.sender+"ytdl",
-                        systemPrompt: `Kamu adalah AI pendeteksi link YouTube, jika ada link YouTube yang tercantum selama berinteraksi dengan pengguna maka ambil link YouTube tersebut untuk diserahkan ke sistem, dan kembalikan respon seperti ini:\`{
-"status": true/false,
-"link": "null/link"
-}\`
-note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
-                        text: m.body,
-                        aiMessage: `Example:
+              const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
+                params: {
+                    user: m.sender+"ytdl",
+                    systemPrompt: `Anda harus membuat json dari konteks percakapan pengguna`,
+                    text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
+                    aiMessage: `Contoh respon anda:
 {
-"status": true,
-"link": "https://youtu.be/2vjPBrBU-TM?si=07UEKhK5_f3hFpwl"
-}`
-                    }
-                }));
+"status":true
+"link": "https://youtu.be/×××"
+}
+note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
+                }
+              }));
                 const { status, link } = JSON.parse(aiResponse.data.result);
                 if (status) {
                     m.reply("Tunggu sebentar...");
@@ -152,17 +146,14 @@ note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti aka
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender+"ytdl",
-                        systemPrompt: `Kamu adalah AI pendeteksi link YouTube, jika ada link YouTube yang tercantum selama berinteraksi dengan pengguna maka ambil link YouTube tersebut untuk diserahkan ke sistem, dan kembalikan respon seperti ini:\`{
-"status": true/false,
-"link": "null/link"
-}\`
-note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
-                        text: m.body,
-                        aiMessage: `Example:
+                        systemPrompt: `Anda harus membuat json dari konteks percakapan pengguna`,
+                        text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
+                        aiMessage: `Contoh respon anda:
 {
 "status":true
-"link": "https://youtu.be/2vjPBrBU-TM?si=07UEKhK5_f3hFpwl"
-}`
+"link": "https://youtu.be/×××"
+}
+note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
                 const { status, link } = JSON.parse(aiResponse.data.result);
@@ -213,19 +204,13 @@ const processMessage = async (client, m) => {
                 const response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
                         user: m.sender,
-                        systemPrompt: `Kamu adalah BOT multifungsi yang dirancang untuk menangani berbagai perintah yang mungkin diberikan oleh pengguna. Berikut adalah daftar perintah yang bisa kamu jalankan:
-
-${menunya}
-
-Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '/ai'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Kembalikan respon dalam format JSON seperti ini:\`{
-"cmd": "perintah-nya" (ex:/ai)
-}\`
-note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
-                        text: m.body,
-                        aiMessage: `Example: 
+                        systemPrompt: `${menunya}\n\nAnda harus membuat JSON dan tentukan pilihan yang susuai untuk memenuhi konteks pengguna`,
+                        text: `Buatkan json dari konteks teks berikut: \`${m.body}\``,
+                        aiMessage: `Contoh respon Anda: 
 {
 "cmd": "/play"
-}`
+}
+note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
                 const { cmd } = JSON.parse(response.data.result);
