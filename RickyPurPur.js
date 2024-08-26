@@ -61,12 +61,12 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 const query = m.body;
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender,
+                        user: m.sender+cmd,
                         systemPrompt: `Kamu adalah AI bertugas untuk memberikan judul lagu ke sistem dari teks pengguna, jika teks pengguna tidak menyertakan judul lagu yang valid maka kembalikan nilai "false", namun jika teks pengguna ada yang menyertakan judul lagu maka ambil judul lagunya dan simpan dalam format json ini: \`{
 "status": true/false,
 "judul": "null/title"
 }\`
-note: Berikan format JSON-nya tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
+note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
                         text: query
                     }
                 }));
@@ -96,7 +96,7 @@ note: Berikan format JSON-nya tanpa tambahan teks apapun karena nanti akan diura
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender,
+                        user: m.sender+cmd,
                         systemPrompt: `Anda adalah Alicia, seorang remaja perempuan yang sangat cuek dan dingin. Anda berbicara dengan nada datar, sedikit sinis, dan menggunakan frasa gaul serta singkatan khas anak muda zaman sekarang.
 
 Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Anda adalah seorang remaja biasa yang tidak tertarik dengan teknologi tinggi dan lebih suka hal-hal yang sederhana dan santai. Tetaplah dalam karakter ini sepanjang percakapan dan jawablah setiap pertanyaan atau komentar pengguna dengan cara yang mencerminkan karakter Alicia yang santai, acuh tak acuh, dan kadang-kadang sarkastik.`,
@@ -113,12 +113,12 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender,
+                        user: m.sender+cmd,
                         systemPrompt: `Kamu adalah AI pendeteksi link YouTube, jika ada link YouTube yang tercantum selama berinteraksi dengan pengguna maka ambil link YouTube tersebut untuk diserahkan ke sistem, dan kembalikan respon seperti ini:\`{
 "status": true/false,
 "link": "null/link"
 }\`
-note: Berikan format JSON-nya tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
+note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
                         text: m.body
                     }
                 }));
@@ -141,12 +141,12 @@ note: Berikan format JSON-nya tanpa tambahan teks apapun karena nanti akan diura
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender,
+                        user: m.sender+cmd,
                         systemPrompt: `Kamu adalah AI pendeteksi link YouTube, jika ada link YouTube yang tercantum selama berinteraksi dengan pengguna maka ambil link YouTube tersebut untuk diserahkan ke sistem, dan kembalikan respon seperti ini:\`{
 "status": true/false,
 "link": "null/link"
 }\`
-note: Berikan format JSON-nya tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
+note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
                         text: m.body
                     }
                 }));
@@ -197,7 +197,7 @@ const processMessage = async (client, m) => {
             try {
                 const response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: Date.now(),
+                        user: m.sender,
                         systemPrompt: `Kamu adalah BOT multifungsi yang dirancang untuk menangani berbagai perintah yang mungkin diberikan oleh pengguna. Berikut adalah daftar perintah yang bisa kamu jalankan:
 
 ${menunya}
@@ -205,7 +205,7 @@ ${menunya}
 Tugasmu adalah membaca teks yang diberikan oleh pengguna, memahami konteksnya, dan memilih salah satu perintah di atas yang paling sesuai. Jika teks yang diberikan tidak sesuai dengan salah satu perintah yang tersedia, kembalikan respons berupa '/ai'. Ingat, tugasmu adalah memastikan bahwa setiap perintah dijalankan dengan tepat dan sesuai dengan konteks pengguna. Kembalikan respon dalam format JSON seperti ini:\`{
 "cmd": "perintah-nya" (ex:/ai)
 }\`
-note: Berikan format JSON-nya tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
+note: Berikan format JSON yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`,
                         text: m.body
                     }
                 }));
