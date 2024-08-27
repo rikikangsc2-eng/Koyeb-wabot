@@ -66,7 +66,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                         text: `Buatkan json dari konteks percakapan berikut: \`${m.body}\``,
                         aiMessage: `Contoh Respon anda:
 {
-"status": true
+"status": true/false
 "judul": "sia - Chandelier"
 }
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
@@ -120,7 +120,7 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
                     text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
                     aiMessage: `Contoh respon anda:
 {
-"status":true
+"status":true/false
 "link": "https://youtu.be/×××"
 }
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
@@ -150,7 +150,7 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
                         text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
                         aiMessage: `Contoh respon anda:
 {
-"status":true
+"status":true/false
 "link": "https://youtu.be/×××"
 }
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
