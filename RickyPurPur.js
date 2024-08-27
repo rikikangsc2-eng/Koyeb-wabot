@@ -7,11 +7,11 @@ const axios = require("axios");
 const BOT_OWNER = '6283894391287';
 const NO_BOT = '6283873321433';
 const BOT_GROUP = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
-const menunya = `1. "/ai" - Untuk mengobrol atau bertanya dengan AI.
-2. "/ytmp3" - Untuk mengunduh audio dari link YouTube yang diberikan.
-3. "/ytmp4" - Untuk mengunduh video dari link YouTube yang diberikan.
+const menunya = `1. "/ai" - Untuk mengobrol, mencari solusi, atau bertanya dengan AI.
+2. "/ytmp3" - Untuk mengunduh audio dari link YouTube.
+3. "/ytmp4" - Untuk mengunduh video dari link YouTube.
 4. "/menu" - Untuk menampilkan menu fitur yang tersedia.
-5. "/play" - Untuk mengunduh musik berdasarkan judul yang diberikan oleh pengguna.
+5. "/play" - Untuk mengunduh musik berdasarkan judul.
 6. "/owner" - Untuk menampilkan informasi tentang owner bot.`;
 
 const getMessageBody = (m) => {
@@ -66,14 +66,13 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                         text: `Buatkan json dari konteks percakapan berikut: \`${m.body}\``,
                         aiMessage: `Contoh Respon anda:
 {
-"status": true/false
-"judul": "sia - Chandelier"
+"judul": "sia - Chandelier"/undefined
 }
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
-                const { status, judul } = JSON.parse(aiResponse.data.result);
-                if (!status) {
+                const { judul } = JSON.parse(aiResponse.data.result);
+                if (!judul) {
                     m.reply("Mohon sertakan judul lagu yang valid.");
                 } else {
                     m.reply(`Saya sedang mencari lagu berjudul ${judul}...`);
@@ -120,14 +119,13 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
                     text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
                     aiMessage: `Contoh respon anda:
 {
-"status":true/false
-"link": "https://youtu.be/×××"
+"link": "https://youtu.be/×××"/undefined
 }
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                 }
               }));
-                const { status, link } = JSON.parse(aiResponse.data.result);
-                if (status) {
+                const { link } = JSON.parse(aiResponse.data.result);
+                if (link) {
                     m.reply("Tunggu sebentar...");
                     const ytmp4Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: link }
@@ -150,14 +148,13 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
                         text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
                         aiMessage: `Contoh respon anda:
 {
-"status":true/false
-"link": "https://youtu.be/×××"
+"link": "https://youtu.be/×××"/undefined
 }
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
-                const { status, link } = JSON.parse(aiResponse.data.result);
-                if (status) {
+                const { link } = JSON.parse(aiResponse.data.result);
+                if (link) {
                     m.reply("Tunggu sebentar...");
                     const ytmp3Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: link }
@@ -208,11 +205,12 @@ const processMessage = async (client, m) => {
                         text: `Buatkan json dari konteks teks berikut: \`${m.body}\``,
                         aiMessage: `Contoh respon Anda: 
 {
-"cmd": "/play"
+"cmd": "/play"/undefined
 }
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
+                if (!cmd) return m.reply("Untuk saat ini belum bisa karena Kemampuan alicia masih terbatas dan masih dalam tahap uji coba, kamu bisa memberikan saran kepada owner wa.me/6283894391287")
                 const { cmd } = JSON.parse(response.data.result);
                 if (m.isGroup) {
                     if (command === 'ai') {
