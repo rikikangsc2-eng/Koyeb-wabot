@@ -210,8 +210,8 @@ const processMessage = async (client, m) => {
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
-                if (!cmd) return m.reply("Untuk saat ini belum bisa karena Kemampuan alicia masih terbatas dan masih dalam tahap uji coba, kamu bisa memberikan saran kepada owner wa.me/6283894391287")
                 const { cmd } = JSON.parse(response.data.result);
+                if (!cmd) return m.reply("Untuk saat ini belum bisa karena Kemampuan alicia masih terbatas dan masih dalam tahap uji coba, kamu bisa memberikan saran kepada owner wa.me/6283894391287")
                 if (m.isGroup) {
                     if (command === 'ai') {
                         m.body = m.body.toLowerCase().split(".ai").slice(1).join("").trim();
