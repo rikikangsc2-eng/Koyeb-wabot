@@ -127,14 +127,15 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
               }));
                 const { link } = JSON.parse(aiResponse.data.result);
                 if (link) {
-                    m.reply("Tunggu sebentar...");
+                    m.reply("Chotto matte!");
                     const ytmp4Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/tt-dl', {
                         params: { url: link }
                     }));
-                    ytmp4Response.data.video = await axios.get(ytmp4Response.data.video, { responseType: 'arraybuffer' });
-                    await client.sendMessage(m.chat, { video: { url: ytmp4Response.data.video }, mimetype: "video/mp4" }, { quoted: m });
+                    let videoNya = ytmp4Response.data.result.video
+                    videoNya = await axios.get(videoNya, { responseType: 'arraybuffer' });
+                    await client.sendMessage(m.chat, { video: { url: videoNya }, mimetype: "video/mp4" }, { quoted: m });
                 } else {
-                    m.reply("Mohon berikan link YouTube yang valid.");
+                    m.reply("Mohon berikan link TikTok yang valid.");
                 }
             } catch (error) {
                 m.reply("*Koneksi terputus, silahkan coba lagi dalam beberapa menit*");
@@ -157,7 +158,7 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
               }));
                 const { link } = JSON.parse(aiResponse.data.result);
                 if (link) {
-                    m.reply("Tunggu sebentar...");
+                    m.reply("Chotto matte!");
                     const ytmp4Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: link }
                     }));
@@ -186,7 +187,7 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
                 }));
                 const { link } = JSON.parse(aiResponse.data.result);
                 if (link) {
-                    m.reply("Tunggu sebentar...");
+                    m.reply("Chotto matte!");
                     const ytmp3Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: link }
                     }));
