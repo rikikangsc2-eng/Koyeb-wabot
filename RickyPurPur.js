@@ -133,7 +133,7 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
                     }));
                     let videoNya = ytmp4Response.data.result.video
                     videoNya = await axios.get(videoNya, { responseType: 'arraybuffer' });
-                    await client.sendMessage(m.chat, { video: { url: videoNya }, mimetype: "video/mp4" }, { quoted: m });
+                    await client.sendMessage(m.chat, { video: { url: Buffer.from(videoNya) }, mimetype: "video/mp4" }, { quoted: m });
                 } else {
                     m.reply("Mohon berikan link TikTok yang valid.");
                 }
