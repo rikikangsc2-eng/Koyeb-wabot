@@ -12,7 +12,8 @@ const menunya = `1. "/ai" - Untuk mengobrol, mencari solusi, atau bertanya denga
 3. "/ytmp4" - Untuk mengunduh video dari link YouTube.
 4. "/menu" - Untuk menampilkan menu fitur yang tersedia.
 5. "/play" - Untuk mengunduh musik berdasarkan judul.
-6. "/owner" - Untuk menampilkan informasi tentang owner bot.`;
+6. "/owner" - Untuk menampilkan informasi tentang owner bot.
+7. "/tiktok" - untuk mengunduh video dari link TikTok`;
 
 const getMessageBody = (m) => {
     switch (m.mtype) {
@@ -105,6 +106,36 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
                     }
                 }));
                 m.reply(aiResponse.data.result);
+            } catch (error) {
+                m.reply("*Koneksi terputus, silahkan coba lagi dalam beberapa menit*");
+            }
+            break;
+        }
+        case "/tiktok": {
+            try {
+              const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
+                params: {
+                    user: m.sender+"ytdl",
+                    systemPrompt: `Anda harus membuat json dari konteks percakapan pengguna`,
+                    text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
+                    aiMessage: `Contoh respon anda:
+{
+"link": "https://vm.tiktok.com/×××"/undefined
+}
+note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
+                }
+              }));
+                const { link } = JSON.parse(aiResponse.data.result);
+                if (link) {
+                    m.reply("Tunggu sebentar...");
+                    const ytmp4Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/tt-dl', {
+                        params: { url: link }
+                    }));
+                    ytmp4Response.data.video = await axios.get(ytmp4Response.data.video, { responseType: 'arraybuffer' });
+                    await client.sendMessage(m.chat, { video: { url: ytmp4Response.data.video }, mimetype: "video/mp4" }, { quoted: m });
+                } else {
+                    m.reply("Mohon berikan link YouTube yang valid.");
+                }
             } catch (error) {
                 m.reply("*Koneksi terputus, silahkan coba lagi dalam beberapa menit*");
             }
