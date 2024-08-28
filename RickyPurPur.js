@@ -6,7 +6,7 @@ const axios = require("axios");
 
 const BOT_OWNER = '6283894391287';
 const NO_BOT = '6283873321433';
-const BOT_GROUP = 'https://chat.whatsapp.com/D6bHVUjyGj06bb6iZeUsOI';
+const BOT_GROUP = 'https://chat.whatsapp.com/DVSbBEUOE3PEctcarjkeQC';
 const menunya = `1. "/ai" - Untuk mengobrol, mencari solusi, atau bertanya dengan AI.
 2. "/ytmp3" - Untuk mengunduh audio dari link YouTube.
 3. "/ytmp4" - Untuk mengunduh video dari link YouTube.
