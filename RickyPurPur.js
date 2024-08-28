@@ -61,7 +61,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 const query = m.body;
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender+"ytplay",
+                        user: m.sender,
                         systemPrompt: `Anda harus membuat JSON dari konteks percakapan pengguna`,
                         text: `Buatkan json dari konteks percakapan berikut: \`${m.body}\``,
                         aiMessage: `Contoh Respon anda:
@@ -85,7 +85,7 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
             break;
         }
         case "/owner": {
-            m.reply(`Halo, saya Alicia! Saya dibuat dan diurus oleh ${BOT_OWNER}. Saya adalah AI canggih yang multifungsi dan serba guna.`);
+            m.reply(`Halo, saya Alicia! Saya dibuat dan diurus oleh ${BOT_OWNER}. Saya adalah AI canggih yang multifungsi dan serba guna, saya mempunyai group ${BOT_GROUP}`);
             break;
         }
         case "/menu": {
@@ -97,7 +97,7 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender+"alicia",
+                        user: m.sender,
                         systemPrompt: `Anda adalah Alicia, seorang remaja perempuan yang sangat cuek dan dingin. Anda berbicara dengan nada datar, sedikit sinis, dan menggunakan frasa gaul serta singkatan khas anak muda zaman sekarang.
 
 Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Anda adalah seorang remaja biasa yang tidak tertarik dengan teknologi tinggi dan lebih suka hal-hal yang sederhana dan santai. Tetaplah dalam karakter ini sepanjang percakapan dan jawablah setiap pertanyaan atau komentar pengguna dengan cara yang mencerminkan karakter Alicia yang santai, acuh tak acuh, dan kadang-kadang sarkastik.`,
@@ -114,7 +114,7 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
             try {
               const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                 params: {
-                    user: m.sender+"ytdl",
+                    user: m.sender,
                     systemPrompt: `Anda harus membuat json dari konteks percakapan pengguna`,
                     text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
                     aiMessage: `Contoh respon anda:
@@ -143,7 +143,7 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender+"ytdl",
+                        user: m.sender,
                         systemPrompt: `Anda harus membuat json dari konteks percakapan pengguna`,
                         text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
                         aiMessage: `Contoh respon anda:
@@ -188,7 +188,7 @@ const processMessage = async (client, m) => {
         const groupName = groupMetadata ? groupMetadata.subject : '';
 
         if (m.isGroup){
-            if (command !== "ai") return 
+            if ( command !== "ai" ) return 
         }
         if (m.body && !m.isGroup) {
             console.log(chalk.black(chalk.bgWhite("[ LOGS ]")), chalk.cyan(body.slice(0, 30)), chalk.magenta("From"), chalk.green(pushname), chalk.yellow(`[ ${sender.replace("@s.whatsapp.net", "")} ]`));
