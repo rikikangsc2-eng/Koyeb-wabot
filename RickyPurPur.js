@@ -71,10 +71,23 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun dan format markdown karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
-                const { judul } = JSON.parse(aiResponse.data.result);
+                let judul;
+try {
+    judul = JSON.parse(aiResponse.data.result);
+} catch (error) {
+    const regex = /```json\s*([\s\S]*?)\s*```/;
+    const match = aiResponse.data.response.match(regex);
+    if (match && match[1]) {
+        judul = JSON.parse(match[1]);
+    } else {
+        m.reply("Data JSON tidak ditemukan atau tidak valid.");
+    }
+}
+                
                 if (!judul) {
                     m.reply("Mohon sertakan judul lagu yang valid.");
                 } else {
+                    judul = judul.judul
                     m.reply(`Saya sedang mencari lagu berjudul ${judul}...`);
                     const playResponse = await retryRequest(() => axios.get(`https://nue-api.vercel.app/api/play?query=${judul}`));
                     await client.sendMessage(m.chat, { audio: { url: playResponse.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
@@ -124,8 +137,21 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun dan format markdown karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                 }
               }));
-                const { link } = JSON.parse(aiResponse.data.result);
-                if (link) {
+                let link;
+try {
+    link = JSON.parse(aiResponse.data.result);
+} catch (error) {
+    const regex = /```json\s*([\s\S]*?)\s*```/;
+    const match = aiResponse.data.response.match(regex);
+    if (match && match[1]) {
+        link = JSON.parse(match[1]);
+    } else {
+        m.reply("Data JSON tidak ditemukan atau tidak valid.");
+    }
+}
+                
+                   if (link) {
+                    link = link.link
                     m.reply("Tunggu sebentar...");
                     const ytmp4Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: link }
@@ -153,8 +179,20 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun dan format markdown karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
-                const { link } = JSON.parse(aiResponse.data.result);
-                if (link) {
+                let link;
+try {
+    link = JSON.parse(aiResponse.data.result);
+} catch (error) {
+    const regex = /```json\s*([\s\S]*?)\s*```/;
+    const match = aiResponse.data.response.match(regex);
+    if (match && match[1]) {
+        link = JSON.parse(match[1]);
+    } else {
+        m.reply("Data JSON tidak ditemukan atau tidak valid.");
+    }
+}
+                   if (link) {
+                    link = link.link
                     m.reply("Tunggu sebentar...");
                     const ytmp3Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: link }
@@ -210,8 +248,20 @@ const processMessage = async (client, m) => {
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun dan format markdown karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
-                const { cmd } = JSON.parse(response.data.result);
+               let cmd;
+try {
+    cmd = JSON.parse(response.data.result);
+} catch (error) {
+    const regex = /```json\s*([\s\S]*?)\s*```/;
+    const match = response.data.response.match(regex);
+    if (match && match[1]) {
+        cmd = JSON.parse(match[1]);
+    } else {
+        m.reply("Data JSON tidak ditemukan atau tidak valid.");
+    }
+}
                 if (!cmd) return m.reply("Untuk saat ini belum bisa karena Kemampuan alicia masih terbatas dan masih dalam tahap uji coba, kamu bisa memberikan saran kepada owner wa.me/6283894391287")
+                 cmd = cmd.cmd
                 if (m.isGroup) {
                     if (command === 'ai') {
                         m.body = m.body.toLowerCase().split(".ai").slice(1).join("").trim();
@@ -224,7 +274,8 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
             } catch (error) {
                 m.reply(`> ${error.message}\nmohon maaf ada sedikit kendala, silahkan coba lagi dalam beberapa menit`);
             }
-        }
+        } 
+        
     } catch (err) {
         m.reply(util.format(err));
     }
