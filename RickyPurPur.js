@@ -61,7 +61,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 const query = m.body;
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender,
+                        user: m.sender+"play",
                         systemPrompt: `Anda harus membuat JSON dari konteks percakapan pengguna`,
                         text: `Buatkan json dari konteks percakapan berikut: \`${m.body}\``,
                         aiMessage: `Contoh Respon anda:
@@ -97,7 +97,7 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender,
+                        user: m.sender+"ai",
                         systemPrompt: `Anda adalah Alicia, seorang remaja perempuan yang sangat cuek dan dingin. Anda berbicara dengan nada datar, sedikit sinis, dan menggunakan frasa gaul serta singkatan khas anak muda zaman sekarang.
 
 Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Anda adalah seorang remaja biasa yang tidak tertarik dengan teknologi tinggi dan lebih suka hal-hal yang sederhana dan santai. Tetaplah dalam karakter ini sepanjang percakapan dan jawablah setiap pertanyaan atau komentar pengguna dengan cara yang mencerminkan karakter Alicia yang santai, acuh tak acuh, dan kadang-kadang sarkastik.`,
@@ -114,7 +114,7 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
             try {
               const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                 params: {
-                    user: m.sender,
+                    user: m.sender+"yt",
                     systemPrompt: `Anda harus membuat json dari konteks percakapan pengguna`,
                     text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
                     aiMessage: `Contoh respon anda:
@@ -143,7 +143,7 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender,
+                        user: m.sender+"yt",
                         systemPrompt: `Anda harus membuat json dari konteks percakapan pengguna`,
                         text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
                         aiMessage: `Contoh respon anda:
