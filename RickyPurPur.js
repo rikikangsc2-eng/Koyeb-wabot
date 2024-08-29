@@ -43,7 +43,7 @@ const retryRequest = async (requestFunction, retries = 3) => {
         try {
             return await requestFunction();
         } catch (error) {
-            m.reply("*Wait reconnect...*");
+            m.reply(`> ${error.message}\nMohon maaf ada sedikit kendala, silahkan coba lagi dalam beberapa menit.`);
             console.error(error);
             if (i < retries - 1) {
                 console.log(chalk.yellow(`Attempt ${i + 1} failed. Retrying...`));
@@ -61,7 +61,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 const query = m.body;
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender+"play",
+                        user: `${m.sender}play`,
                         systemPrompt: `Anda harus membuat JSON dari konteks percakapan pengguna.\nPenting! Kirimkan format JSON secara langsung tanpa basa-basi karna bisa menyebabkan error saat di urai nanti`,
                         text: `Buatkan json dari konteks percakapan berikut: \`${m.body}\``,
                         aiMessage: `Contoh Respon anda:
@@ -72,28 +72,28 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
                     }
                 }));
                 let judul;
-try {
-    judul = JSON.parse(aiResponse.data.result);
-} catch (error) {
-    const regex = /```json\s*([\s\S]*?)\s*```/;
-    const match = aiResponse.data.response.match(regex);
-    if (match && match[1]) {
-        judul = JSON.parse(match[1]);
-    } else {
-        m.reply("Data JSON tidak ditemukan atau tidak valid.");
-    }
-}
-                
-                if (!judul) {
+                try {
+                    judul = JSON.parse(aiResponse.data.result);
+                } catch (error) {
+                    const regex = /```json\s*([\s\S]*?)\s*```/i;
+                    const match = aiResponse.data.response.toLowerCase().match(regex);
+                    if (match && match[1]) {
+                        judul = JSON.parse(match[1]);
+                    } else {
+                        m.reply("Data JSON tidak ditemukan atau tidak valid.");
+                    }
+                }
+
+                if (!judul.judul) {
                     m.reply("Mohon sertakan judul lagu yang valid.");
                 } else {
-                    judul = judul.judul
+                    judul = judul.judul;
                     m.reply(`Saya sedang mencari lagu berjudul ${judul}...`);
                     const playResponse = await retryRequest(() => axios.get(`https://nue-api.vercel.app/api/play?query=${judul}`));
                     await client.sendMessage(m.chat, { audio: { url: playResponse.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
                 }
             } catch (error) {
-                m.reply("*Koneksi terputus, silahkan coba lagi dalam beberapa menit*");
+                m.reply(`> ${error.message}\nMohon maaf ada sedikit kendala, silahkan coba lagi dalam beberapa menit.`);
             }
             break;
         }
@@ -110,7 +110,7 @@ try {
             try {
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender+"ai",
+                        user: `${m.sender}ai`,
                         systemPrompt: `Anda adalah Alicia, seorang remaja perempuan yang sangat cuek dan dingin. Anda berbicara dengan nada datar, sedikit sinis, dan menggunakan frasa gaul serta singkatan khas anak muda zaman sekarang.
 
 Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau kecerdasan buatan. Anda adalah seorang remaja biasa yang tidak tertarik dengan teknologi tinggi dan lebih suka hal-hal yang sederhana dan santai. Tetaplah dalam karakter ini sepanjang percakapan dan jawablah setiap pertanyaan atau komentar pengguna dengan cara yang mencerminkan karakter Alicia yang santai, acuh tak acuh, dan kadang-kadang sarkastik.`,
@@ -119,57 +119,17 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
                 }));
                 m.reply(aiResponse.data.result);
             } catch (error) {
-                m.reply("*Koneksi terputus, silahkan coba lagi dalam beberapa menit*");
+                m.reply(`> ${error.message}\nMohon maaf ada sedikit kendala, silahkan coba lagi dalam beberapa menit.`);
             }
             break;
         }
-        case "/ytmp4": {
-            try {
-              const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
-                params: {
-                    user: m.sender+"yt",
-                    systemPrompt: `Anda harus membuat json dari konteks percakapan pengguna.\nPenting! Kirimkan format JSON secara langsung tanpa basa-basi karna bisa menyebabkan error saat di urai nanti`,
-                    text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
-                    aiMessage: `Contoh respon anda:
-{
-"link": "https://youtu.be/×××"/undefined
-}
-note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun dan format markdown karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
-                }
-              }));
-                let link;
-try {
-    link = JSON.parse(aiResponse.data.result);
-} catch (error) {
-    const regex = /```json\s*([\s\S]*?)\s*```/;
-    const match = aiResponse.data.response.match(regex);
-    if (match && match[1]) {
-        link = JSON.parse(match[1]);
-    } else {
-        m.reply("Data JSON tidak ditemukan atau tidak valid.");
-    }
-}
-                
-                   if (link) {
-                    link = link.link
-                    m.reply("Tunggu sebentar...");
-                    const ytmp4Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
-                        params: { url: link }
-                    }));
-                    await client.sendMessage(m.chat, { video: { url: ytmp4Response.data.download.video }, mimetype: "video/mp4" }, { quoted: m });
-                } else {
-                    m.reply("Mohon berikan link YouTube yang valid.");
-                }
-            } catch (error) {
-                m.reply("*Koneksi terputus, silahkan coba lagi dalam beberapa menit*");
-            }
-            break;
-        }
+        case "/ytmp4":
         case "/ytmp3": {
             try {
+                const isYTmp4 = cmd === "/ytmp4";
                 const aiResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
                     params: {
-                        user: m.sender+"yt",
+                        user: `${m.sender}yt`,
                         systemPrompt: `Anda harus membuat json dari konteks percakapan pengguna.\nPenting! Kirimkan format JSON secara langsung tanpa basa-basi karna bisa menyebabkan error saat di urai nanti`,
                         text: `Buatkan JSON dari konteks percakapan berikut: \`${m.body}\``,
                         aiMessage: `Contoh respon anda:
@@ -180,29 +140,32 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
                     }
                 }));
                 let link;
-try {
-    link = JSON.parse(aiResponse.data.result);
-} catch (error) {
-    const regex = /```json\s*([\s\S]*?)\s*```/;
-    const match = aiResponse.data.response.match(regex);
-    if (match && match[1]) {
-        link = JSON.parse(match[1]);
-    } else {
-        m.reply("Data JSON tidak ditemukan atau tidak valid.");
-    }
-}
-                   if (link) {
-                    link = link.link
+                try {
+                    link = JSON.parse(aiResponse.data.result);
+                } catch (error) {
+                    const regex = /```json\s*([\s\S]*?)\s*```/i;
+                    const match = aiResponse.data.response.toLowerCase().match(regex);
+                    if (match && match[1]) {
+                        link = JSON.parse(match[1]);
+                    } else {
+                        m.reply("Data JSON tidak ditemukan atau tidak valid.");
+                    }
+                }
+
+                if (link.link) {
+                    link = link.link;
                     m.reply("Tunggu sebentar...");
-                    const ytmp3Response = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
+                    const ytdlResponse = await retryRequest(() => axios.get('https://nue-api.vercel.app/api/ytdl', {
                         params: { url: link }
                     }));
-                    await client.sendMessage(m.chat, { audio: { url: ytmp3Response.data.download.audio }, mimetype: "audio/mpeg" }, { quoted: m });
+                    const mediaType = isYTmp4 ? 'video' : 'audio';
+                    const mimetype = isYTmp4 ? "video/mp4" : "audio/mpeg";
+                    await client.sendMessage(m.chat, { [mediaType]: { url: ytdlResponse.data.download[mediaType] }, mimetype }, { quoted: m });
                 } else {
                     m.reply("Mohon berikan link YouTube yang valid.");
                 }
             } catch (error) {
-                m.reply("*Koneksi terputus, silahkan coba lagi dalam beberapa menit*");
+                m.reply(`> ${error.message}\nMohon maaf ada sedikit kendala, silahkan coba lagi dalam beberapa menit.`);
             }
             break;
         }
@@ -225,9 +188,7 @@ const processMessage = async (client, m) => {
         const groupMetadata = m.isGroup ? await client.groupMetadata(from).catch(() => undefined) : undefined;
         const groupName = groupMetadata ? groupMetadata.subject : '';
 
-        if (m.isGroup){
-            if ( command !== "ai" ) return 
-        }
+        if (m.isGroup && command !== "ai") return;
         if (m.body && !m.isGroup) {
             console.log(chalk.black(chalk.bgWhite("[ LOGS ]")), chalk.cyan(body.slice(0, 30)), chalk.magenta("From"), chalk.green(pushname), chalk.yellow(`[ ${sender.replace("@s.whatsapp.net", "")} ]`));
         } else if (m.body && m.isGroup) {
@@ -248,20 +209,21 @@ const processMessage = async (client, m) => {
 note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun dan format markdown karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
-               let cmd;
-try {
-    cmd = JSON.parse(response.data.result);
-} catch (error) {
-    const regex = /```json\s*([\s\S]*?)\s*```/;
-    const match = response.data.response.match(regex);
-    if (match && match[1]) {
-        cmd = JSON.parse(match[1]);
-    } else {
-        m.reply("Data JSON tidak ditemukan atau tidak valid.");
-    }
-}
-                if (!cmd) return m.reply("Untuk saat ini belum bisa karena Kemampuan alicia masih terbatas dan masih dalam tahap uji coba, kamu bisa memberikan saran kepada owner wa.me/6283894391287")
-                 cmd = cmd.cmd
+                let cmd;
+                try {
+                    cmd = JSON.parse(response.data.result);
+                } catch (error) {
+                    const regex = /```json\s*([\s\S]*?)\s*```/i;
+                    const match = response.data.response.toLowerCase().match(regex);
+                    if (match && match[1]) {
+                        cmd = JSON.parse(match[1]);
+                    } else {
+                        m.reply("Data JSON tidak ditemukan atau tidak valid.");
+                    }
+                }
+
+                if (!cmd.cmd) return m.reply("Untuk saat ini belum bisa karena Kemampuan alicia masih terbatas dan masih dalam tahap uji coba, kamu bisa memberikan saran kepada owner wa.me/6283894391287");
+                cmd = cmd.cmd;
                 if (m.isGroup) {
                     if (command === 'ai') {
                         m.body = m.body.toLowerCase().split(".ai").slice(1).join("").trim();
@@ -272,7 +234,7 @@ try {
                     await handleCommandResponse(cmd, pushname, sender, m, client);
                 }
             } catch (error) {
-                m.reply(`> ${error.message}\nmohon maaf ada sedikit kendala, silahkan coba lagi dalam beberapa menit`);
+                m.reply(`> ${error.message}\nMohon maaf ada sedikit kendala, silahkan coba lagi dalam beberapa menit`);
             }
         } 
         
