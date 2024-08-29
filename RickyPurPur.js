@@ -57,14 +57,7 @@ const retryRequest = async (requestFunction, retries = 3) => {
     }
 };
 
-const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
-    const aiRequest = async (systemPrompt, text) => {
-        return retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
-            params: { user: sender + cmd, systemPrompt, text }
-        }));
-    };
-
-    const parseJSON = (data, regex) => {
+const parseJSON = (data, regex) => {
         try {
             return JSON.parse(data.result);
         } catch {
@@ -75,6 +68,12 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
                 m.reply("Data JSON tidak ditemukan atau tidak valid.");
             }
         }
+    };
+const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
+    const aiRequest = async (systemPrompt, text) => {
+        return retryRequest(() => axios.get('https://nue-api.vercel.app/api/lgpt', {
+            params: { user: sender + cmd, systemPrompt, text }
+        }));
     };
 
     switch (cmd) {
