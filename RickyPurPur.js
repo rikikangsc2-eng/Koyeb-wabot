@@ -68,7 +68,7 @@ const handleCommandResponse = async (cmd, pushname, sender, m, client) => {
 {
 "judul": "sia - Chandelier"/undefined
 }
-note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
+note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun dan format markdown karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
                 const { judul } = JSON.parse(aiResponse.data.result);
@@ -121,7 +121,7 @@ Penting: Anda bukan AI atau robot, dan Anda tidak tahu apa itu model bahasa atau
 {
 "link": "https://youtu.be/×××"/undefined
 }
-note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
+note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun dan format markdown karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                 }
               }));
                 const { link } = JSON.parse(aiResponse.data.result);
@@ -150,7 +150,7 @@ note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambah
 {
 "link": "https://youtu.be/×××"/undefined
 }
-note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
+note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun dan format markdown karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
                 const { link } = JSON.parse(aiResponse.data.result);
@@ -207,7 +207,7 @@ const processMessage = async (client, m) => {
 {
 "cmd": "/play"/undefined
 }
-note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
+note: jawab hanya dengan memberikan format JSON nya saja yang valid tanpa tambahan teks apapun dan format markdown karena nanti akan diurai oleh sistem menggunakan JSON.parse()`
                     }
                 }));
                 const { cmd } = JSON.parse(response.data.result);
